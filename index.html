@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shippax Ferry Conference app</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#26262b">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Shippax">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800&family=Barlow+Condensed:wght@300&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* Layout: phone-width app shell. Home is a sky-and-sea scene with a red 3x3 tile grid; inner pages are light cards between dark top and bottom bars. */
+  --red:#c8102e; --red-hi:#ff4d66; --bar:#26262b; --ink:#1d1d22; --paper:#f4f2f2; --card:#ffffff; --muted:#686870; --line:#e4e0e1;
+  --ok:#1f7a4d;
+  --display:'Bebas Neue','Oswald',Impact,'Arial Narrow',sans-serif;
+  --body:'Barlow','Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  color-scheme: light;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%;margin:0}
+body{background:#18191d;font-family:var(--body);color:var(--ink);-webkit-font-smoothing:antialiased;font-size:16px}
+button{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--red-hi);outline-offset:2px}
+#app{position:relative;height:100%;max-width:480px;margin:0 auto;display:flex;flex-direction:column;background:var(--paper);overflow:hidden}
+@media (min-width:560px){#app{height:calc(100% - 32px);margin:16px auto;border-radius:28px;box-shadow:0 24px 60px rgba(0,0,0,.5)}}
+#screen{flex:1;min-height:0;display:flex;flex-direction:column;position:relative}
+
+/* Top bar */
+.topbar{flex:none;display:flex;align-items:center;gap:4px;height:58px;padding:0 6px;background:var(--bar);color:#fff}
+.topbar h1{flex:1;min-width:0;margin:0;font:400 28px/1 var(--display);letter-spacing:.4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-top:3px}
+.sp0{width:10px;flex:none}.sp{width:40px;flex:none}
+.iconbtn{width:42px;height:42px;border:0;background:transparent;border-radius:50%;display:grid;place-items:center;cursor:pointer;flex:none;padding:0}
+.iconbtn:hover{background:rgba(127,127,127,.15)}
+.iconbtn svg{width:24px;height:24px}
+.iconbtn.sm{width:32px;height:32px}.iconbtn.sm svg{width:18px;height:18px}
+.iconbtn:disabled{opacity:.25;cursor:default}
+
+.content{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 16px 28px;display:flex;flex-direction:column;gap:12px}
+.content>*{flex-shrink:0}
+.stack{display:flex;flex-direction:column;gap:12px}
+
+/* Home */
+.home-wrap{flex:1;min-height:0;position:relative;background:#6f9bb2 center/cover no-repeat}
+.home-wrap.photo::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.28),rgba(0,0,0,0) 40%)}
+.scene{position:absolute;inset:0;width:100%;height:100%}
+.fsbtn{position:absolute;top:12px;right:12px;z-index:5;width:42px;height:42px;border-radius:50%;border:0;background:rgba(18,20,24,.5);color:#fff;display:grid;place-items:center;cursor:pointer;padding:0;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.fsbtn svg{width:22px;height:22px}
+html:fullscreen #app{height:100%;margin:0 auto;border-radius:0}
+html:-webkit-full-screen #app{height:100%;margin:0 auto;border-radius:0}
+.home{position:relative;z-index:1;height:100%;overflow-y:auto}
+.home-inner{min-height:100%;display:flex;flex-direction:column;align-items:center;padding:max(52px,10vh) 16px 28px;gap:22px}
+.logo{color:#fff;display:flex;flex-direction:column;align-items:center;filter:drop-shadow(0 1px 2px rgba(0,0,0,.25))}
+.logo-top{display:flex;align-items:flex-end;gap:6px}
+.logo-word{font:800 34px/1 var(--body);letter-spacing:.02em}
+.swoosh{width:56px;height:32px;margin-bottom:3px}
+.logo-sub{font:300 30px/1.1 'Barlow Condensed',var(--body);letter-spacing:.01em;margin-top:4px}
+.logo-img{max-width:260px;max-height:130px;object-fit:contain}
+.nowpill{display:flex;align-items:center;gap:8px;max-width:100%;background:rgba(22,24,28,.78);color:#fff;border:0;border-radius:999px;padding:9px 16px;font-size:15px;cursor:pointer;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.nowpill b{font-family:var(--display);font-weight:400;font-size:19px;letter-spacing:.5px;color:var(--red-hi);padding-top:2px}
+.nowpill .tt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.nowpill .tm{font-variant-numeric:tabular-nums;color:#cfd0d6;flex:none}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--red-hi);flex:none;animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.35}}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px 16px;width:100%;max-width:390px;margin-top:clamp(16px,7vh,90px)}
+.tile{display:flex;flex-direction:column;align-items:center;gap:7px;background:none;border:0;cursor:pointer;color:#fff;padding:0;min-width:0}
+.tile .sq{width:100%;aspect-ratio:1;background:var(--red);border-radius:19%;display:grid;place-items:center;position:relative;box-shadow:inset 0 0 0 2px rgba(70,0,10,.55),0 4px 12px rgba(0,0,0,.28);transition:transform .12s}
+.tile:active .sq{transform:scale(.96)}
+.tile .sq svg{width:54%;height:54%}
+.tile .lbl{font:400 clamp(19px,5.6vw,27px)/1 var(--display);letter-spacing:.2px;text-shadow:0 1px 2px rgba(0,0,0,.85),0 0 10px rgba(0,0,0,.45);white-space:nowrap;text-transform:uppercase}
+.tbadge{position:absolute;top:-7px;right:-7px;min-width:26px;height:26px;padding:0 7px;border-radius:13px;background:#fff;color:var(--red);font:700 14px/26px var(--body);text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.35)}
+
+/* Bottom nav */
+#nav{flex:none;display:flex;background:var(--bar);padding:6px 4px calc(6px + env(safe-area-inset-bottom))}
+#nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;background:none;border:0;color:#fff;font:500 13px var(--body);padding:6px 0 4px;cursor:pointer;position:relative}
+#nav button[aria-current="page"]{color:var(--red-hi)}
+#nav svg{width:27px;height:27px}
+#nav .badge{position:absolute;top:1px;left:calc(50% + 7px);min-width:19px;height:19px;padding:0 5px;border-radius:10px;background:var(--red-hi);color:#fff;font:700 11px/19px var(--body)}
+
+/* Cards and lists */
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
+.list{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.row{display:flex;align-items:center;gap:12px;width:100%;padding:12px 14px;border:0;border-top:1px solid var(--line);background:none;text-align:left;cursor:pointer;color:var(--ink)}
+.list>.row:first-child,.list>.sess:first-child,.list>.ann:first-child,.list>.nrow:first-child,.list>.tile-row:first-child{border-top:0}
+div.row{cursor:default}
+.row:hover{background:#faf8f8}
+.row .main{flex:1;min-width:0}
+.t{display:block;font-weight:600;font-size:16px;line-height:1.3}
+.s{display:block;color:var(--muted);font-size:14px;line-height:1.35;margin-top:2px}
+.s.one{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.s.strong{color:var(--ink);font-weight:600}
+.chev{width:18px;height:18px;color:#b8b1b3;flex:none}
+.row-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.row-h time,.ann-h time{font-size:12px;color:var(--muted);flex:none}
+.row-ic{width:38px;height:38px;border-radius:10px;background:var(--red);color:#fff;display:grid;place-items:center;flex:none}
+.row-ic svg{width:21px;height:21px}
+.row-ic.soft{background:#fde8eb;color:var(--red)}
+.row>svg{width:22px;height:22px;flex:none;color:var(--muted)}
+.row.danger,.row.danger>svg{color:var(--red)}
+.row.past{opacity:.55}
+.sec-h{font:700 12px var(--body);letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin:6px 2px -4px}
+.lead{margin:0;color:var(--muted);font-size:15px;line-height:1.45}
+.hint{margin:0;font-size:13px;color:var(--muted);line-height:1.4}
+.hint.pad{padding:16px}
+.note{display:flex;gap:8px;align-items:flex-start;margin:2px;font-size:13px;line-height:1.4;color:var(--muted)}
+.note svg{width:17px;height:17px;flex:none;margin-top:1px}
+.empty{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;color:var(--muted);padding:44px 16px}
+.empty svg{width:42px;height:42px;color:#c9c2c4}
+.empty p{margin:0;max-width:30ch}
+
+/* Avatars and logos */
+.av{display:inline-grid;place-items:center;border-radius:50%;background:#ccc center/cover no-repeat;color:#fff;font-weight:600;flex:none;letter-spacing:.02em}
+.lg{display:inline-grid;place-items:center;border-radius:12px;background:#fff center/80% no-repeat;border:1px solid var(--line);color:#fff;font-weight:700;flex:none}
+
+/* Pills and chips */
+.pill{display:inline-flex;align-items:center;height:22px;padding:0 9px;border-radius:999px;font-size:12px;font-weight:700;letter-spacing:.02em;vertical-align:middle;white-space:nowrap}
+.pill.sm{height:19px;font-size:11px;padding:0 7px}
+.pill.red{background:var(--red);color:#fff}
+.pill.green{background:#e2f1e9;color:#17603c}
+.pill.amber{background:#fbeed6;color:#784800}
+.pill.grey{background:#ece9ea;color:#3e3e45}
+.pill.platinum{background:#e4e7ec;color:#363b44}.pill.gold{background:#f5e8c4;color:#6e5100}.pill.silver{background:#eceef0;color:#4d5157}.pill.partner{background:#ece9ea;color:#3e3e45}
+.gchips{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.gchip{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:#45454c;background:#f0eded;border-radius:999px;padding:2px 8px}
+.gchip i{width:8px;height:8px;border-radius:50%}
+.you{color:var(--muted);font-weight:400}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips.scroll{flex-wrap:nowrap;overflow-x:auto;padding-bottom:2px}
+.chip{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 13px;border-radius:999px;border:1px solid #cfc8ca;background:#fff;font:500 14px var(--body);cursor:pointer;white-space:nowrap;flex:none}
+.chip i{width:9px;height:9px;border-radius:50%}
+.chip .n{color:var(--muted)}
+.chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
+.chip[aria-pressed="true"] .n{color:#c9c9cf}
+.seg{display:flex;background:#e8e4e5;border-radius:11px;padding:3px;gap:2px}
+.seg button{flex:1;min-width:0;height:38px;border:0;background:none;border-radius:9px;font:600 14px var(--body);color:#4a4a52;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 6px}
+.seg button[aria-pressed="true"]{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.15)}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:48px;padding:0 18px;border-radius:12px;border:1px solid transparent;background:var(--red);color:#fff;font:600 16px var(--body);cursor:pointer;text-decoration:none;white-space:nowrap}
+.btn svg{width:20px;height:20px}
+.btn:hover{filter:brightness(1.06)}
+.btn.block{width:100%}
+.btn.secondary{background:#fff;color:var(--ink);border-color:#cfc8ca}
+.btn.ghost{background:transparent;color:var(--ink)}
+.btn.danger{background:#fff;color:var(--red);border-color:#efc3ca}
+.btn.danger-fill{background:var(--red)}
+.btn.sm{height:36px;padding:0 13px;font-size:14px;border-radius:10px}
+.danger-t{color:var(--red)!important}
+.actions{display:flex;gap:10px}
+.actions .btn{flex:1}
+
+/* Forms */
+.form{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.form>*{grid-column:1/-1}
+.form>.half{grid-column:auto}
+.field{display:flex;flex-direction:column;gap:7px;min-width:0}
+.field>label,.field>.lbl,.lbl{font-weight:600;font-size:14px}
+.opt{font-weight:400;color:var(--muted);font-size:13px}
+input,textarea,select{font:400 16px var(--body);color:var(--ink);background:#fff;border:1px solid #d2cbcd;border-radius:10px;padding:0 12px;height:48px;width:100%;min-width:0}
+textarea{height:auto;padding:11px 12px;line-height:1.45;resize:vertical}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--ink);box-shadow:0 0 0 3px rgba(200,16,46,.16)}
+input[type=checkbox]{width:22px;height:22px;accent-color:var(--red);flex:none;margin:0}
+.search{background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E") 12px center/20px no-repeat;padding-left:42px}
+.count{align-self:flex-end;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;margin-top:-3px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.switch{-webkit-appearance:none;appearance:none;width:50px!important;height:30px!important;border-radius:15px;background:#cfc8ca;border:0;position:relative;cursor:pointer;transition:background .2s;padding:0;margin:0;flex:none}
+.switch::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:transform .2s}
+.switch:checked{background:var(--ok)}
+.switch:checked::after{transform:translateX(20px)}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 14px;cursor:pointer;background:#fff}
+.form>.toggle-row{border:1px solid var(--line);border-radius:12px}
+.list>.toggle-row{border-top:1px solid var(--line)}.list>.toggle-row:first-child{border-top:0}
+.toggle-row b{display:block;font-weight:600}
+.toggle-row small{display:block;color:var(--muted);font-size:13px;margin-top:2px}
+.imgpick{display:flex;align-items:center;gap:14px}
+.imgprev{width:84px;height:84px;border-radius:14px;background:#ebe7e8 center/cover no-repeat;display:grid;place-items:center;color:#9a9396;flex:none}
+.imgprev svg{width:28px;height:28px}
+.imgpick.round .imgprev{border-radius:50%}
+.imgpick.wide .imgprev,.imgpick.bg .imgprev{width:150px;height:90px}
+.imgpick.logo .imgprev{width:150px;height:90px;background-color:#26262b;background-size:contain;background-origin:content-box;padding:10px;color:#777}
+.imgbtns{display:flex;flex-direction:column;gap:8px;align-items:flex-start}
+.swatches{display:flex;gap:10px;flex-wrap:wrap}
+.sw{width:36px;height:36px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 1px #cfc8ca;cursor:pointer}
+.sw[aria-pressed="true"]{box-shadow:0 0 0 3px var(--ink)}
+.row.check{cursor:pointer}
+
+/* Programme */
+.now{display:flex;flex-direction:column;gap:7px;width:100%;text-align:left;background:var(--bar);color:#fff;border:0;border-radius:16px;padding:16px;cursor:pointer}
+.now .k{display:flex;align-items:center;gap:8px;font:400 21px/1 var(--display);letter-spacing:.6px;color:var(--red-hi)}
+.now .h2,.now h2{display:block;margin:0;font-size:21px;font-weight:700;line-height:1.22;text-wrap:balance}
+.now .m{display:block;color:#c9c9d0;font-size:15px}
+.now .m.small{font-size:13px;font-variant-numeric:tabular-nums}
+.now p{margin:0;color:#c9c9d0;font-size:15px}
+.bar{display:block;height:6px;border-radius:3px;background:rgba(255,255,255,.18);overflow:hidden;margin-top:4px}
+.bar i{display:block;height:100%;background:var(--red-hi);border-radius:3px}
+.nextc{display:flex;flex-direction:column;gap:2px;width:100%;text-align:left;background:#fff;border:1px solid var(--line);border-left:4px solid var(--red);border-radius:12px;padding:12px 14px;cursor:pointer}
+.k2{font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--red)}
+.sess{display:flex;gap:12px;align-items:flex-start;width:100%;padding:13px 14px;border:0;border-top:1px solid var(--line);background:#fff;text-align:left;cursor:pointer}
+.sess .time{width:50px;flex:none;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.3}
+.sess .time small{display:block;font-weight:400;color:var(--muted);font-size:13px}
+.sess .main{flex:1;min-width:0}
+.sess .chev{margin-top:2px}
+.sess.live{background:#fff4f5;box-shadow:inset 4px 0 0 var(--red)}
+.sess.past{opacity:.5}
+.tt-time{font:400 23px/1 var(--display);width:54px;flex:none;color:var(--red);padding-top:2px;letter-spacing:.3px}
+.row.tt{align-items:flex-start}
+
+/* Detail pages */
+.hero .kicker{font-size:13px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.06em}
+.hero h2{margin:6px 0 8px;font-size:23px;line-height:1.22;text-wrap:balance}
+.meta{display:flex;align-items:center;gap:6px;color:var(--muted);font-size:15px;margin-top:4px}
+.meta svg{width:18px;height:18px;flex:none}
+.prose{font-size:16px;line-height:1.55}
+.prose p{margin:0 0 10px;max-width:65ch}
+.prose p:last-child{margin:0}
+.prose a{color:var(--red)}
+.person{display:flex;flex-direction:column;align-items:center;text-align:center;gap:3px;padding:6px 0}
+.person h2{margin:10px 0 2px;font-size:24px;line-height:1.2;text-wrap:balance}
+.person .s{font-size:15px}
+.person-actions{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;justify-content:center}
+.person.compact{flex-direction:row;text-align:left;gap:14px;align-items:center}
+.person.compact h2{margin:0 0 2px;font-size:20px}
+.org{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}
+.org h2{margin:0;font-size:22px}
+.wide-img{width:100%;aspect-ratio:16/9;border-radius:14px;background:#ddd center/cover no-repeat}
+.kv{display:flex;flex-direction:column;gap:6px;font-size:14px}
+.kv span{color:var(--muted)}
+.spons{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.spons.big{grid-template-columns:1fr}
+.spon{display:flex;flex-direction:column;align-items:center;gap:10px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 10px;text-align:center;font:600 15px var(--body);cursor:pointer}
+.stand{font-size:12px;font-weight:700;background:#ece9ea;border-radius:8px;padding:4px 8px;flex:none;font-variant-numeric:tabular-nums}
+.exc{display:flex;flex-direction:column;background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden;text-align:left;padding:0;cursor:pointer;width:100%}
+.exc-img{display:block;height:130px;background:#ccd center/cover no-repeat}
+.exc-img.ph{display:grid;place-items:center;background:linear-gradient(160deg,#6c9ab3,#2d5a74);color:#fff}
+.exc-img.ph svg{width:46px;height:46px}
+.exc-body{padding:12px 14px 14px;display:flex;flex-direction:column;gap:3px}
+
+/* Announcements and push */
+.ann{display:flex;gap:12px;padding:14px;border-top:1px solid var(--line)}
+.ann.new{background:#fff6f7}
+.ann-ic{width:38px;height:38px;border-radius:50%;background:#fde8eb;color:var(--red);display:grid;place-items:center;flex:none}
+.ann-ic svg{width:20px;height:20px}
+.ann .main{flex:1;min-width:0}
+.ann-h{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.ann-b{display:block;font-size:15px;line-height:1.45;margin-top:3px}
+.ann-b p{margin:0 0 6px}.ann-b p:last-child{margin:0}
+.nrow{display:flex;flex-direction:column;gap:4px;padding:14px;border-top:1px solid var(--line)}
+.nrow .when{font-size:13px;font-weight:700;color:var(--red)}
+.nrow .btns{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+.preview{background:linear-gradient(160deg,#6c9ab3,#2d5a74);border-radius:16px;padding:18px 12px}
+.nb{display:flex;gap:11px;width:100%;text-align:left;background:rgba(250,250,252,.97);border:0;border-radius:18px;padding:12px;box-shadow:0 8px 28px rgba(0,0,0,.28);cursor:pointer;color:var(--ink)}
+.nb .main{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.nb-h{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.nb b{font-size:15px}
+.nb-b{font-size:14px;line-height:1.35;color:#33333a;overflow-wrap:anywhere}
+.nb-more{font-size:12px;color:var(--muted)}
+.appicon{width:38px;height:38px;border-radius:9px;background:var(--red);display:grid;place-items:center;flex:none}
+.appicon svg{width:28px;height:18px}
+#banner{position:absolute;top:8px;left:8px;right:8px;z-index:50;transform:translateY(-140%);transition:transform .35s ease;pointer-events:none}
+#banner.show{transform:none;pointer-events:auto}
+
+/* Stats */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.stat{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 12px 10px;display:flex;flex-direction:column;gap:2px}
+.stat b{font:400 34px/1 var(--display);font-variant-numeric:tabular-nums}
+.stat span{font-size:13px;color:var(--muted)}
+
+/* Messages */
+.count-badge{min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:var(--red);color:#fff;font:700 12px/22px var(--body);text-align:center;flex:none}
+.chat{flex:1;min-height:0;display:flex;flex-direction:column}
+.msgs{flex:1;min-height:0;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:6px}
+.bubble{max-width:80%;padding:9px 13px;border-radius:18px;font-size:16px;line-height:1.38;white-space:pre-wrap;overflow-wrap:anywhere}
+.bubble.me{align-self:flex-end;background:var(--red);color:#fff;border-bottom-right-radius:6px}
+.bubble.them{align-self:flex-start;background:#fff;border:1px solid var(--line);border-bottom-left-radius:6px}
+.stamp{align-self:center;font-size:12px;color:var(--muted);margin:10px 0 4px}
+.chat-empty{margin:auto;color:var(--muted);text-align:center}
+.composer{flex:none;display:flex;align-items:flex-end;gap:8px;padding:8px 10px;background:#fff;border-top:1px solid var(--line)}
+.composer textarea{flex:1;height:44px;min-height:44px;max-height:130px;resize:none;border-radius:22px;padding:11px 16px}
+.send{width:44px;height:44px;border-radius:50%;border:0;background:var(--red);color:#fff;display:grid;place-items:center;cursor:pointer;flex:none}
+.send svg{width:20px;height:20px}
+.chat-who{flex:1;min-width:0;display:flex;align-items:center;gap:10px;background:none;border:0;color:#fff;text-align:left;cursor:pointer;padding:0}
+.chat-who b{display:block;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chat-who small{display:block;color:#b9b9c0;font-size:12px}
+.chat-who>span:last-child{min-width:0}
+
+/* Home screen settings */
+.tile-row{display:flex;align-items:center;gap:8px;padding:8px 8px 8px 10px;border-top:1px solid var(--line)}
+.tile-row input:not([type]),.tile-row input[type=text]{height:40px}
+.mini-tile{width:34px;height:34px;border-radius:8px;background:var(--red);color:#fff;display:grid;place-items:center;flex:none}
+.mini-tile svg{width:20px;height:20px}
+.mini-check{display:flex;align-items:center;gap:5px;font-size:13px;flex:none;cursor:pointer}
+.updown{display:flex;flex:none}
+
+/* Sign in */
+.home-inner.auth{gap:18px;padding-top:max(40px,7vh)}
+.auth-card{width:100%;max-width:410px;background:rgba(255,255,255,.97);border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:12px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.auth-card h2{margin:0;font:400 32px/1 var(--display);letter-spacing:.3px}
+.auth-card>p{margin:0;color:#45454c;line-height:1.45}
+.err{color:var(--red)!important;font-weight:600}
+.demo-list{display:flex;flex-direction:column;gap:6px}
+.demo-u{display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid var(--line);border-radius:12px;background:#fff;text-align:left;cursor:pointer}
+.demo-u b{display:block;font-size:15px}
+.demo-u small{display:block;color:var(--muted);font-size:13px}
+
+/* Overlays */
+#modal .overlay{position:absolute;inset:0;z-index:60;background:rgba(0,0,0,.45);display:flex;align-items:flex-end}
+.sheet{width:100%;background:#fff;border-radius:20px 20px 0 0;padding:22px 16px calc(16px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:10px}
+.sheet .q{margin:0 0 6px;font-size:17px;line-height:1.45}
+#toast{position:absolute;left:50%;bottom:86px;z-index:70;transform:translate(-50%,16px);opacity:0;pointer-events:none;background:#1d1d22;color:#fff;padding:11px 16px;border-radius:12px;font-size:15px;max-width:calc(100% - 32px);width:max-content;text-align:center;transition:opacity .2s,transform .2s;box-shadow:0 6px 20px rgba(0,0,0,.3)}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+@media (display-mode:standalone),(display-mode:fullscreen){.fsbtn,.fs-row{display:none!important}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="screen"></div>
+  <nav id="nav" aria-label="Main"></nav>
+  <div id="banner" role="status" aria-live="polite"></div>
+  <div id="modal" hidden></div>
+  <div id="toast" role="status" aria-live="polite"></div>
+</div>
+<noscript>This prototype needs JavaScript.</noscript>
+<script>
+(function(){
+'use strict';
+
+/* ---------- Basics ---------- */
+const KEY='shippax-fc-proto-v1';
+const $=(s,r=document)=>r.querySelector(s);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const nid=()=>Math.random().toString(36).slice(2,10)+Date.now().toString(36).slice(-3);
+const pad=n=>String(n).padStart(2,'0');
+const DAYS=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const DAYSL=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const MON=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const MONS=MON.map(m=>m.slice(0,3));
+const COLORS=['#c8102e','#1f5fa8','#1f7a4d','#b26a00','#6b3fa0','#0f6f78','#5b5b66','#b0306a'];
+
+function dParse(date,time){const [y,m,d]=String(date).split('-').map(Number);const [h,mi]=String(time||'00:00').split(':').map(Number);return new Date(y,(m||1)-1,d||1,h||0,mi||0)}
+const hm=d=>pad(d.getHours())+':'+pad(d.getMinutes());
+const ymd=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const fmtDay=date=>{const d=dParse(date);return DAYS[d.getDay()]+' '+d.getDate()+' '+MONS[d.getMonth()]};
+const fmtDayLong=date=>{const d=dParse(date);return DAYSL[d.getDay()]+' '+d.getDate()+' '+MON[d.getMonth()]};
+function fmtDT(ts){const d=new Date(ts),n=now();return DAYS[d.getDay()]+' '+d.getDate()+' '+MONS[d.getMonth()]+(d.getFullYear()!==n.getFullYear()?' '+d.getFullYear():'')+', '+hm(d)}
+function fmtDate(ts){const d=new Date(ts);return d.getDate()+' '+MONS[d.getMonth()]}
+function fmtWhen(ts){const d=new Date(ts),n=now();if(d.toDateString()===n.toDateString())return hm(d);const y=new Date(n);y.setDate(n.getDate()-1);if(d.toDateString()===y.toDateString())return 'Yesterday '+hm(d);return d.getDate()+' '+MONS[d.getMonth()]+(d.getFullYear()!==n.getFullYear()?' '+d.getFullYear():'')+', '+hm(d)}
+
+/* ---------- Icons ---------- */
+const P={
+ programme:'<path d="M2.5 5.5c3-1.4 6.2-1.4 9.5.8v13.4c-3.3-2.2-6.5-2.2-9.5-.8z"/><path d="M21.5 5.5c-3-1.4-6.2-1.4-9.5.8v13.4c3.3-2.2 6.5-2.2 9.5-.8z"/><path d="M5.5 9.3h3.5M5.5 12.3h3.5M5.5 15.3h3.5M15 9.3h3.5M15 12.3h3.5M15 15.3h3.5"/>',
+ sponsors:'<path d="m11 17 2 2a1 1 0 1 0 3-3"/><path d="m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.88-3.88a3 3 0 0 0-4.24 0l-.88.88a1 1 0 1 1-3-3l2.81-2.81a5.79 5.79 0 0 1 7.06-.87l.47.28a2 2 0 0 0 1.42.25L21 4"/><path d="m21 3 1 11h-2"/><path d="M3 3 2 14l6.5 6.5a1 1 0 1 0 3-3"/><path d="M3 4h8"/>',
+ exhibitors:'<rect x="3" y="3" width="18" height="10" rx="1.5"/><circle cx="7" cy="16" r="1.6"/><circle cx="12" cy="16" r="1.6"/><circle cx="17" cy="16" r="1.6"/><path d="M4.3 21a2.7 2.7 0 0 1 5.4 0M9.3 21a2.7 2.7 0 0 1 5.4 0M14.3 21a2.7 2.7 0 0 1 5.4 0"/>',
+ delegates:'<circle cx="12" cy="5" r="2.2"/><path d="M8.8 10.6a3.2 3.2 0 0 1 6.4 0"/><circle cx="5.5" cy="15" r="2.2"/><path d="M2.3 20.6a3.2 3.2 0 0 1 6.4 0"/><circle cx="18.5" cy="15" r="2.2"/><path d="M15.3 20.6a3.2 3.2 0 0 1 6.4 0"/><path d="m9.6 12.4-1.9 1.4M14.4 12.4l1.9 1.4"/>',
+ speakers:'<circle cx="12" cy="4.8" r="2.6"/><path d="M7.3 12a4.7 4.7 0 0 1 9.4 0"/><path d="M3.5 12h17l-1.6 3.2H5.1z"/><path d="M8 15.2V21M16 15.2V21"/>',
+ goodtoknow:'<path d="M9.5 18h5M10.5 21h3"/><path d="M12 4a5.8 5.8 0 0 0-3.4 10.5c.6.5.9 1.1.9 1.9V16h5v-.1c0-.8.3-1.4.9-1.9A5.8 5.8 0 0 0 12 4z"/><path d="M2.5 9.8h1.8M19.7 9.8h1.8M4.6 3.8l1.3 1.3M19.4 3.8l-1.3 1.3"/>',
+ timetable:'<path d="M20 10V6.5A2.5 2.5 0 0 0 17.5 4h-11A2.5 2.5 0 0 0 4 6.5v11A2.5 2.5 0 0 0 6.5 20H11"/><path d="M8 2.5v3M16 2.5v3M4 9.5h8"/><circle cx="17" cy="17" r="4.8"/><path d="M17 14.8V17l1.5 1"/>',
+ announcements:'<path d="M3 10.5 18 5.5v13L3 14z"/><path d="M11.2 16.6a3 3 0 1 1-5.8-1.5"/><path d="M20.5 9.5h1.8M20 5.5l1.4-1.2M20 14l1.4 1.2"/>',
+ excursions:'<rect x="4.5" y="3" width="15" height="14.5" rx="3"/><path d="M4.5 10.5h15M12 3v7.5M2.5 7.5v3M21.5 7.5v3"/><circle cx="8.3" cy="14" r=".9"/><circle cx="15.7" cy="14" r=".9"/><path d="M7.5 17.5v2.5M16.5 17.5v2.5"/>',
+ dots:'<g fill="currentColor" stroke="none"><circle cx="5" cy="5" r="2.3"/><circle cx="12" cy="5" r="2.3"/><circle cx="19" cy="5" r="2.3"/><circle cx="5" cy="12" r="2.3"/><circle cx="12" cy="12" r="2.3"/><circle cx="19" cy="12" r="2.3"/><circle cx="5" cy="19" r="2.3"/><circle cx="12" cy="19" r="2.3"/><circle cx="19" cy="19" r="2.3"/></g>',
+ messages:'<path d="M20.5 12a8.5 8.5 0 0 1-12.3 7.6L3.5 21l1.4-4.6A8.5 8.5 0 1 1 20.5 12z"/>',
+ search:'<circle cx="11" cy="11" r="7"/><path d="m20 20-3.6-3.6"/>',
+ settings:'<path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/>',
+ admin:'<path d="M12 3 20 6v6c0 4.5-3.4 8.2-8 9-4.6-.8-8-4.5-8-9V6z"/><path d="m8.8 12 2.2 2.2 4.2-4.4"/>',
+ back:'<path d="M15 5l-7 7 7 7"/>',
+ plus:'<path d="M12 5v14M5 12h14"/>',
+ edit:'<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/>',
+ trash:'<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>',
+ send:'<path d="M21 3 10.5 13.5"/><path d="M21 3 14.5 21l-4-7.5L3 9.5z"/>',
+ chev:'<path d="m9 5 7 7-7 7"/>',
+ clock:'<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>',
+ pin:'<path d="M12 21s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/>',
+ users:'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14.2a6.5 6.5 0 0 1 3.5 5.8"/>',
+ group:'<circle cx="7" cy="8" r="3"/><circle cx="17" cy="8" r="3"/><circle cx="12" cy="16.5" r="3"/>',
+ bell:'<path d="M6 16v-5a6 6 0 1 1 12 0v5l2 2H4z"/><path d="M10 21h4"/>',
+ layout:'<rect x="3.5" y="3.5" width="7" height="7" rx="1.6"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.6"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.6"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.6"/>',
+ doc:'<path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M9 12h6M9 16h6"/>',
+ camera:'<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>',
+ up:'<path d="m6 15 6-6 6 6"/>',
+ down:'<path d="m6 9 6 6 6-6"/>',
+ link:'<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',
+ mail:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3.5 7 8.5 6 8.5-6"/>',
+ logout:'<path d="M14 4h5v16h-5"/><path d="M10 8l-4 4 4 4M6 12h10"/>',
+ refresh:'<path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/>',
+ info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.6v.4"/>',
+ expand:'<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>',
+ shrink:'<path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/>'
+};
+const icon=(n,cls)=>'<svg'+(cls?' class="'+cls+'"':'')+' viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(P[n]||'')+'</svg>';
+const chev=icon('chev','chev');
+const SWOOSH='<svg class="swoosh" viewBox="0 0 92 52" fill="none" stroke="currentColor" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 20C38 11 58 6 88 5"/><path d="M10 33C32 21 56 15 88 5L66 44"/><path d="M4 46C24 36 42 31 62 28"/></svg>';
+const APPICON='<span class="appicon"><svg viewBox="0 0 92 52" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 20C38 11 58 6 88 5"/><path d="M10 33C32 21 56 15 88 5L66 44"/><path d="M4 46C24 36 42 31 62 28"/></svg></span>';
+
+const SCENE='<svg class="scene" viewBox="0 0 400 800" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5b93b2"/><stop offset=".6" stop-color="#97bfd1"/><stop offset="1" stop-color="#b6d0da"/></linearGradient><linearGradient id="sea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6b98b0"/><stop offset="1" stop-color="#2b5872"/></linearGradient></defs>'
+ +'<rect width="400" height="560" fill="url(#sky)"/>'
+ +'<path d="M232 552q14-12 30-7 14-11 32-4 16-10 34-2 14-7 30 0 20-8 42 2V560H232z" fill="#4d6b55" opacity=".8"/>'
+ +'<rect y="555" width="400" height="245" fill="url(#sea)"/>'
+ +'<g stroke="#fff" stroke-opacity=".13" stroke-width="1.3"><path d="M0 598h400M30 632h330M0 676h400M50 724h300M0 770h400"/></g>'
+ +'<g><path d="M-60 300 L-46 262 H18 L26 300z" fill="#e9edef"/><path d="M-44 272 H20" stroke="#c41f30" stroke-width="7"/>'
+ +'<path d="M66 336V266M44 286h44M52 302h28" stroke="#e8ecee" stroke-width="4"/>'
+ +'<path d="M-60 300H190Q214 302 220 336H-60z" fill="#f4f6f7"/><rect x="-60" y="312" width="266" height="11" fill="#1e2a33" opacity=".85"/>'
+ +'<path d="M-60 336H232Q254 338 260 372H-60z" fill="#f4f6f7"/><rect x="-60" y="349" width="306" height="8" fill="#26323c" opacity=".8"/>'
+ +'<path d="M-60 372H268Q290 374 296 410H-60z" fill="#f4f6f7"/><rect x="-60" y="386" width="342" height="8" fill="#26323c" opacity=".8"/>'
+ +'<path d="M-60 410H300Q322 413 330 450H-60z" fill="#f4f6f7"/><rect x="-60" y="424" width="376" height="8" fill="#26323c" opacity=".8"/>'
+ +'<path d="M-60 450H322Q350 470 352 514H-60z" fill="#eef1f3"/><rect x="-60" y="486" width="360" height="5" fill="#2b3640" opacity=".5"/>'
+ +'<path d="M110 514 236 462h26L148 514z" fill="#c41f30"/>'
+ +'<path d="M-60 514H352Q350 530 330 560H-60z" fill="#c41f30"/>'
+ +'<path d="M-60 514H352" stroke="#000" stroke-opacity=".12" stroke-width="1.5"/></g>'
+ +'<rect x="-60" y="560" width="400" height="16" fill="#c41f30" opacity=".13"/>'
+ +'<defs><linearGradient id="dim" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0b1620" stop-opacity="0"/><stop offset=".5" stop-color="#0b1620" stop-opacity=".28"/><stop offset="1" stop-color="#0b1620" stop-opacity="0"/></linearGradient></defs><rect y="230" width="400" height="400" fill="url(#dim)"/></svg>';
+
+/* ---------- Content definitions ---------- */
+const TILES=[{id:'programme',label:'Programme'},{id:'sponsors',label:'Sponsors'},{id:'exhibitors',label:'Exhibitors'},{id:'delegates',label:'Delegates'},{id:'speakers',label:'Speakers'},{id:'goodtoknow',label:'Good to know'},{id:'timetable',label:'Timetable'},{id:'announcements',label:'Announcements'},{id:'excursions',label:'Excursions'}];
+const GROUPS_F={k:'groups',l:'Visible to',t:'groups'};
+const SCHEMA={
+ programme:{noun:'session',fields:[{k:'title',l:'Session title',t:'text',req:1},{k:'date',l:'Date',t:'date',req:1,half:1},{k:'location',l:'Location',t:'text',half:1},{k:'start',l:'Starts',t:'time',req:1,half:1},{k:'end',l:'Ends',t:'time',req:1,half:1},{k:'speakers',l:'Speakers',t:'speakers'},{k:'description',l:'Description',t:'textarea'},GROUPS_F]},
+ speakers:{noun:'speaker',fields:[{k:'photo',l:'Photo',t:'image',shape:'round'},{k:'name',l:'Name',t:'text',req:1},{k:'title',l:'Job title',t:'text'},{k:'company',l:'Company',t:'text'},{k:'bio',l:'Biography',t:'textarea'},GROUPS_F]},
+ sponsors:{noun:'sponsor',fields:[{k:'logo',l:'Logo',t:'image',shape:'logo'},{k:'name',l:'Company name',t:'text',req:1},{k:'tier',l:'Sponsor level',t:'select',opts:['Main sponsor','Sponsor','Partner']},{k:'description',l:'About the company',t:'textarea'},{k:'website',l:'Website',t:'url'},GROUPS_F]},
+ exhibitors:{noun:'exhibitor',fields:[{k:'logo',l:'Logo',t:'image',shape:'logo'},{k:'name',l:'Company name',t:'text',req:1},{k:'stand',l:'Stand number',t:'text'},{k:'description',l:'About the company',t:'textarea'},{k:'website',l:'Website',t:'url'},GROUPS_F]},
+ goodtoknow:{noun:'article',fields:[{k:'title',l:'Heading',t:'text',req:1},{k:'image',l:'Image',t:'image',shape:'wide'},{k:'body',l:'Text',t:'textarea',rows:8},GROUPS_F]},
+ timetable:{noun:'timetable entry',fields:[{k:'title',l:'What happens',t:'text',req:1},{k:'date',l:'Date',t:'date',req:1,half:1},{k:'time',l:'Time',t:'time',req:1,half:1},{k:'note',l:'Note',t:'text'},GROUPS_F]},
+ excursions:{noun:'excursion',fields:[{k:'image',l:'Image',t:'image',shape:'wide'},{k:'title',l:'Excursion name',t:'text',req:1},{k:'date',l:'Date',t:'date',req:1,half:1},{k:'meeting',l:'Meeting point',t:'text',half:1},{k:'start',l:'Starts',t:'time',half:1},{k:'end',l:'Ends',t:'time',half:1},{k:'description',l:'Description',t:'textarea'},GROUPS_F]}
+};
+
+/* ---------- Demo data ---------- */
+function seed(){
+ const t=Date.now(),H=36e5,D=24*H;
+ const G=(name,color)=>({id:nid(),name,color});
+ const gOrg=G('Organisers','#c8102e'),gSpk=G('Speakers','#1f5fa8'),gDel=G('Delegates','#5b5b66'),gSpo=G('Sponsors & exhibitors','#b26a00'),gExc=G('Helsinki walking tour','#1f7a4d');
+ const U=o=>Object.assign({id:nid(),role:'delegate',status:'active',firstName:'',lastName:'',title:'',company:'',bio:'',linkedin:'',photo:null,groups:[gDel.id],visible:true,push:true,invitedAt:t-20*D},o);
+ const victor=U({email:'victor@shippax.se',role:'admin',firstName:'Victor',title:'Editor-in-chief',company:'Shippax',groups:[gOrg.id,gExc.id],bio:'Editor-in-chief of Shippax Info and one of the organisers of the Shippax Ferry Conference.'});
+ const anna=U({email:'anna.lindqvist@example.com',firstName:'Anna',lastName:'Lindqvist',title:'Head of Fleet Planning',company:'Baltic Crossings',bio:'Responsible for fleet renewal and newbuilding strategy on Baltic RoPax routes.'});
+ const mikko=U({email:'mikko.virtanen@example.com',firstName:'Mikko',lastName:'Virtanen',title:'Technical Director',company:'Nordline Ferries',groups:[gDel.id,gExc.id],bio:"Naval architect by training. Leads the technical department and the company's hybrid conversion programme."});
+ const users=[victor,anna,mikko,
+  U({email:'sofia.marino@example.com',firstName:'Sofia',lastName:'Marino',title:'Commercial Manager',company:'Mediterranea Lines',bio:'Works on pricing and onboard revenue for overnight routes in the western Mediterranean.'}),
+  U({email:'james.okafor@example.com',firstName:'James',lastName:'Okafor',title:'Sales Director',company:'Nordic Marine Systems',groups:[gDel.id,gSpo.id],bio:'Works with automation and energy management systems for passenger ships.'}),
+  U({email:'ingrid.solheim@example.com',firstName:'Ingrid',lastName:'Solheim',title:'Chief Financial Officer',company:'Fjordkyst Shipping',groups:[gDel.id,gExc.id]}),
+  U({email:'pierre.laurent@example.com',firstName:'Pierre',lastName:'Laurent',title:'Head of Sustainability',company:'Atlantique Ferries',bio:'Leads decarbonisation planning, including shore power and alternative fuels across the fleet.'}),
+  U({email:'emma.clarke@example.com',firstName:'Emma',lastName:'Clarke',title:'Marketing Director',company:'Celtic Sea Ferries'}),
+  U({email:'kenji.sato@example.com',firstName:'Kenji',lastName:'Sato',title:'Project Manager, Newbuildings',company:'Hoshi Shipyard',groups:[gDel.id,gSpo.id]}),
+  U({email:'lars.berg@example.com',firstName:'Lars',lastName:'Berg',title:'Port Director',company:'Port of Nordhamn'}),
+  U({email:'helena.vik@example.com',firstName:'Helena',lastName:'Vik',title:'Senior Researcher',company:'Nordic Maritime Institute'}),
+  U({email:'new.delegate@example.com',status:'invited',invitedAt:t-3*D}),
+  U({email:'peter.holm@example.com',status:'invited',invitedAt:t-3*D}),
+  U({email:'maria.santos@example.com',status:'invited',invitedAt:t-D,groups:[gDel.id,gExc.id]})];
+ const SP=(name,title,company,bio)=>({id:nid(),name,title,company,bio,photo:null,groups:[]});
+ const speakers=[
+  SP('Frederik Erdmann','Moderator and contributing correspondent','Shippax','Shippax correspondent since 1996 and working in shipping since 1999, including positions at Sartori & Berger and Wyker Dampfschiffs-Reederei. Runs his own maritime consultancy and lectures at Flensburg University of Applied Sciences. Elected mayor of Rügge in 2023.'),
+  SP('Alan Lam','Co-moderator, correspondent and analyst','Shippax','Freelance journalist and maritime transport researcher based in Hong Kong and Austria. Has contributed to Shippax publications since 2010 and compiles market reports for investors, lenders and suppliers.'),
+  SP('ABB speaker','To be announced','ABB',''),
+  SP('Diego Caride','Business Development Director, Marine Division','Ingeteam',"Leads Ingeteam's global maritime strategy. Long background in the naval sector and almost a decade at Ingeteam, including a period as managing director of Ingeteam China."),
+  SP('Heidi Nag Flikka','CEO','Fjord Line',"CEO of Fjord Line since 1 July 2026, succeeding Brian Thorsted Hansen. Member of the company's board since 2020 and CFO in 2019–2020. Previously headed Flekkefjord Sparebank."),
+  SP('Peep Jalakas','CEO','AS Tallink Grupp','Joined Tallink Grupp in April 2026 after more than 20 years in finance, most recently as head of corporate banking and management board member at SEB Estonia.'),
+  SP('Tomas Karlsson','CEO','Eckerö Linjen','Has led Eckerö Linjen since 2009, running its ferry service between Sweden and Åland.'),
+  SP('Magnus Müller','Chief Executive Officer','Telenor Maritime',"More than 20 years in telecommunications, including senior leadership roles in Europe and Asia. Leads Telenor Maritime's work on connected maritime operations."),
+  SP('Achille Onorato','Vice Chairman and CEO','Moby S.p.A.','Fifth-generation shipowner. In leadership roles at Moby since 2012 and CEO since 2016. Also chairs Toremar and Agemar and is vice chairman of Assarmatori.'),
+  SP('Bruce Peter','Professor of Design History','Glasgow School of Art','Researches merchant ship design and passenger shipping. Recent work covers DFDS and Tor Line; current projects include Finnish shipbuilding and ocean liner travel.'),
+  SP('Marcus Risberg','CEO','Viking Line','CEO of Viking Line since 3 November 2025. Previously CEO of Destination Gotland, with earlier senior roles at Silja Line and Tallink Grupp, including managing director of Tallink Silja.'),
+  SP('Noah Silberschmidt','Founder, CEO and Board Member','Silverstream Technologies',"Founded Silverstream in 2010. The company's patented air lubrication system reduces hull friction, and the Financial Times ranked it fourth among Europe's fastest-growing companies in 2023. Previously spent 17 years in investment banking."),
+  SP('Oier Urrutia Madariaga','Key Account Manager, Marine Drives & Automation','Ingeteam',"Manages strategic customer relationships and business development for Ingeteam's marine propulsion and automation solutions."),
+  SP("Giosue' Vezzuto",'Executive Vice President','RINA Marine',"Joined RINA in 1997 and has worked in classification, fire protection engineering and regional management in Asia and northern Europe. Returned to RINA's Genoa headquarters in 2018 and has led RINA Marine since late 2019.")];
+ const d1='2027-04-20',d2='2027-04-21',d3='2027-04-22';
+ const TBC='Draft: time and speakers to be confirmed.';
+ const SE=(date,start,end,title,location,speakers,description,groups)=>({id:nid(),date,start,end,title,location:location||'',speakers:speakers||[],description:description||'',groups:groups||[]});
+ const programme=[
+  SE(d1,'13:00','14:15','Registration and boarding','Stadsgården terminal, Stockholm',[],'Collect your badge and cabin key at the Shippax registration desk.'),
+  SE(d1,'13:45','14:15','Speaker briefing','Conference room',[],'Timings and technical set-up for all speakers and moderators.',[gSpk.id,gOrg.id]),
+  SE(d1,'14:30','15:00','Welcome and opening','Conference hall',[],'Opening of the 24th Shippax Ferry Conference. Theme: optimising vessel lifecycles.'),
+  SE(d1,'15:00','16:00','Keynote speakers','Conference hall',[],TBC),
+  SE(d1,'16:00','16:30','Coffee break in the exhibition','Exhibition area'),
+  SE(d1,'16:30','17:30','RoPax and RoRo ferry executives panel debate','Conference hall',[],TBC),
+  SE(d1,'17:30','18:15','Ferry industry performance and megatrends','Conference hall',[],TBC),
+  SE(d1,'19:30','23:00','Welcome dinner','Main restaurant'),
+  SE(d2,'09:00','10:00','Shipbuilding market debate','Conference hall',[],TBC),
+  SE(d2,'10:00','10:30','Coffee break in the exhibition','Exhibition area'),
+  SE(d2,'10:30','11:15','Financing, insurance and ship recycling','Conference hall',[],TBC),
+  SE(d2,'11:15','12:00','New ships and projects','Conference hall',[],TBC),
+  SE(d2,'12:00','13:00','Lunch','Main restaurant'),
+  SE(d2,'13:30','16:00','Excursions in Helsinki','Ashore',[],'See Excursions.'),
+  SE(d2,'16:45','17:30','Interferry update','Conference hall',[],TBC),
+  SE(d2,'19:30','23:30','Shippax Awards and gala dinner','Main restaurant',[],'Dress code: dark suit or equivalent.'),
+  SE(d3,'07:30','08:45','Breakfast','Main restaurant'),
+  SE(d3,'08:45','09:30','New technologies and inspirations','Conference hall',[],TBC),
+  SE(d3,'09:30','09:50','Closing remarks','Conference hall')];
+ const T=(date,time,title,note)=>({id:nid(),date,time,title,note:note||'',groups:[]});
+ const timetable=[T(d1,'13:00','Boarding opens','Stadsgården terminal, Stockholm'),T(d1,'16:30','Departure from Stockholm'),T(d2,'10:10','Arrival in Helsinki','Katajanokka terminal'),T(d2,'16:30','All aboard','Excursion groups back on board'),T(d2,'17:00','Departure from Helsinki'),T(d3,'10:00','Arrival in Stockholm','Disembarkation')];
+ const O=(name,o)=>Object.assign({id:nid(),name,logo:null,description:'',website:'',groups:[]},o);
+ const ORG={
+  telenor:['Telenor Maritime','Maritime connectivity and digital services for shipowners. Part of the Telenor Group, based in Arendal, Norway.','http://www.telenormaritime.com'],
+  rina:['RINA','Classification and certification services, plus the SERTICA software for fleet performance and electronic logbooks.','http://www.rina.org'],
+  abb:['ABB Marine & Ports','Electrical, digital and automation solutions for vessels, ports and terminals.','http://www.abb.com/marine'],
+  blrt:['BLRT Repair Yards','Ship repair yards in Estonia, Lithuania and Finland, part of BLRT Grupp.','https://blrtyards.com/en/'],
+  brax:['Brax Shipping','Gothenburg-based shipbrokers for sale and purchase, chartering and newbuilding of ferries, RoPax, cruise and RoRo ships.','http://www.braxship.com'],
+  carus:['Carus','IT systems for ferry and cruise operators, covering reservations, onboard services and port automation.','http://www.carus.com'],
+  damen:['Damen','Family-owned shipyard group covering ferry design and building, electric and hybrid vessels, and support services.','http://www.damen.com'],
+  hogia:['Hogia Ferry Systems','Swedish supplier of reservation, ticketing, passenger information and terminal systems, with an API for integrations.','http://www.hogiaferrysystems.com'],
+  ingeteam:['Ingeteam','Electric propulsion equipment for ships, including frequency converters, motors and generators.','https://www.ingeteam.com/'],
+  macgregor:['MacGregor','Cargo and load handling solutions for maritime and offshore operations.','https://www.macgregor.com/'],
+  mercy:['Mercy Ships','Charity running hospital ships that provide free surgery and healthcare in sub-Saharan Africa, crewed by volunteers.','https://www.mercyships.org'],
+  nowhere:['Nowhere Networks','High-speed maritime internet networks, delivered as a fully managed service for a monthly fee.','http://www.nowherenetworks.com/'],
+  silver:['Silverstream Technologies','Air lubrication system that reduces fuel consumption and emissions for shipowners and shipyards.','https://silverstream-tech.com/segments/roro-and-pctc/'],
+  stena:['Stena RoRo','Designs, builds and charters RoRo and RoPax tonnage and supplies tailor-made ship solutions.','http://www.stenaroro.com'],
+  viking:['Viking Line','Finnish cruise ferry operator founded on Åland in 1959, serving routes across the northern Baltic. Operator of VIKING CINDERELLA.','https://www.vikingline.com/']};
+ const org=(k,extra)=>O(ORG[k][0],Object.assign({description:ORG[k][1],website:ORG[k][2]},extra));
+ const sponsors=[org('telenor',{tier:'Main sponsor'}),org('rina',{tier:'Main sponsor'})].concat(['abb','blrt','brax','carus','damen','hogia','ingeteam','macgregor','mercy','nowhere','silver','stena','viking'].map(k=>org(k,{tier:'Sponsor'})));
+ const exhibitors=['abb','hogia','ingeteam','mercy','nowhere','rina','silver','telenor'].map(k=>org(k,{stand:''}));
+ const AR=(title,body,groups)=>({id:nid(),title,body,image:null,groups:groups||[]});
+ const goodtoknow=[AR('About the 2027 conference','The 24th Shippax Ferry Conference takes place on board VIKING CINDERELLA, Stockholm–Helsinki–Stockholm, 20–22 April 2027. Theme: optimising vessel lifecycles.\n\nMain programme sessions: RoPax and RoRo ferry executives panel debates, shipbuilding market debates, financing, insurance and ship recycling, keynote speakers, new ships and projects, ferry industry performance and megatrends, new technologies and inspirations, an Interferry update and the Shippax Awards.\n\nThe detailed programme and timetable will be published later.'),AR('Registration and badges','The Shippax registration desk opens at 13:00 on 20 April in the terminal and moves on board after departure.\n\nPlease wear your badge at all sessions and meals.'),AR('Wi-Fi on board','The network name and password are printed on the back of your badge.'),AR('Cabins and luggage','Cabin keys are handed out at registration. Leave your luggage in your cabin before the opening session.'),AR('Time zones','Finland is one hour ahead of Sweden. All times in the app are local time on board.'),AR('Dress code','Business casual during the day. Dark suit or equivalent for the Shippax Awards and gala dinner.'),AR('Speaker information','Send your final presentation to the organisers by 15 April. A technician is in the conference hall 30 minutes before each session.',[gSpk.id,gOrg.id]),AR('Contact the organisers','Send a message to an organiser in the app, or find us at the registration desk.')];
+ const excursions=[{id:nid(),title:'Helsinki walking tour',date:d2,start:'13:30',end:'16:00',meeting:'At the gangway, 13:15',description:'A guided walk through the city centre and the South Harbour. Participants are in the Helsinki walking tour group and get reminders by push message.',image:null,groups:[]},{id:nid(),title:'Ferry terminal visit',date:d2,start:'13:30',end:'16:00',meeting:'Katajanokka terminal entrance',description:'Behind the scenes at a busy ferry terminal: check-in, vehicle lanes and shore power.',image:null,groups:[]}];
+ const N=(title,body,all,groups,status,when)=>({id:nid(),title,body,target:{all,groups},status,sendAt:when,sentAt:status==='sent'?when:null,createdBy:victor.id});
+ const notifs=[N('Welcome to the conference app','Complete your profile so other delegates can find you. The programme, speakers and practical information are all here.',true,[],'sent',t-2*D),
+  N('Boarding opens at 13:00','Registration and boarding at Stadsgården terminal open at 13:00. Have your booking reference ready.',true,[],'scheduled',dParse(d1,'12:30').getTime()),
+  N('Speaker briefing at 13:45','All speakers and moderators: briefing in conference room B at 13:45.',false,[gSpk.id,gOrg.id],'scheduled',dParse(d1,'13:30').getTime()),
+  N('Coffee in the exhibition','Coffee is served in the exhibition area until 16:30. Visit our sponsors and exhibitors.',true,[],'scheduled',dParse(d1,'16:00').getTime()),
+  N('Walking tour meets at 13:15','Helsinki walking tour: meet at the gangway at 13:15. Bring a warm jacket.',false,[gExc.id],'scheduled',dParse(d2,'13:00').getTime()),
+  N('Shippax Awards at 19:30','The Shippax Awards and gala dinner start at 19:30 in the main restaurant.',true,[],'scheduled',dParse(d2,'18:30').getTime())];
+ const convs=[{id:nid(),members:[victor.id,anna.id],msgs:[{id:nid(),from:anna.id,text:'Hi Victor, is there a list of the exhibitors yet? I would like to plan a few meetings on board.',at:t-26*H},{id:nid(),from:victor.id,text:'Yes, the exhibitors booked so far are in the app under Exhibitors. More will be added as bookings come in.',at:t-25*H},{id:nid(),from:anna.id,text:'Perfect, see you there.',at:t-25*H+9*6e4}],read:{[victor.id]:t-25*H,[anna.id]:t-25*H+9*6e4}},
+  {id:nid(),members:[mikko.id,victor.id],msgs:[{id:nid(),from:mikko.id,text:'Is there still space on the Helsinki walking tour for a colleague of mine?',at:t-3*H}],read:{[mikko.id]:t-3*H}}];
+ return {v:2,me:victor.id,settings:{bg:null,logo:null,tagline:'20–22 April 2027 · VIKING CINDERELLA · Stockholm–Helsinki–Stockholm',clockOffset:0},
+  tiles:TILES.map(x=>Object.assign({},x,{hidden:false})),groups:[gOrg,gSpk,gDel,gSpo,gExc],users,
+  items:{programme,speakers,sponsors,exhibitors,goodtoknow,timetable,excursions},notifs,convs,reads:{}};
+}
+
+/* ---------- State ---------- */
+let S=null;
+try{const raw=localStorage.getItem(KEY);if(raw)S=JSON.parse(raw)}catch(e){S=null}
+if(!S||S.v!==2){const old=S;S=seed();if(old&&old.settings){S.settings.bg=old.settings.bg||null;S.settings.logo=old.settings.logo||null;S._migrated=true}}
+let saveT=null,warned=false;
+function save(){clearTimeout(saveT);saveT=setTimeout(()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){if(!warned){warned=true;toast("Changes can't be stored on this device, so they last until you close the page.")}}},150)}
+if(S._migrated){delete S._migrated;save()}
+const now=()=>new Date(Date.now()+(S.settings.clockOffset||0));
+
+const user=id=>S.users.find(u=>u.id===id);
+const me=()=>S.me?user(S.me):null;
+const isAdmin=()=>{const u=me();return !!u&&u.role==='admin'};
+const uname=u=>u?((((u.firstName||'')+' '+(u.lastName||'')).trim())||u.email):'Unknown';
+const nmOf=o=>o.name||uname(o);
+const group=id=>S.groups.find(g=>g.id===id);
+const tileLabel=s=>(S.tiles.find(t=>t.id===s)||{label:s}).label;
+const items=s=>S.items[s]||(S.items[s]=[]);
+const findItem=(s,id)=>items(s).find(x=>x.id===id);
+const sStart=s=>dParse(s.date,s.start);
+const sEnd=s=>dParse(s.date,s.end||s.start);
+const sessions=()=>items('programme').filter(canSee).sort((a,b)=>sStart(a)-sStart(b)||String(a.end).localeCompare(String(b.end)));
+function canSee(it){const g=it.groups||[];if(!g.length)return true;const u=me();if(!u)return false;if(u.role==='admin')return true;return g.some(x=>(u.groups||[]).includes(x))}
+const isRecipient=(n,u)=>!!u&&(n.target.all||(u.groups||[]).some(g=>n.target.groups.includes(g)));
+const recips=n=>S.users.filter(u=>isRecipient(n,u));
+const lastMsg=c=>c.msgs[c.msgs.length-1];
+const unreadIn=(c,id)=>c.msgs.filter(m=>m.from!==id&&m.at>((c.read||{})[id]||0)).length;
+const unreadMsgs=()=>S.convs.filter(c=>c.members.includes(S.me)).reduce((a,c)=>a+unreadIn(c,S.me),0);
+function unreadAnn(){const u=me();if(!u)return 0;const last=(S.reads[u.id]||{}).ann||0;return S.notifs.filter(n=>n.status==='sent'&&isRecipient(n,u)&&n.sentAt>last).length}
+const byName=(a,b)=>(a.status===b.status?0:a.status==='active'?-1:1)||String(a.lastName||a.firstName||a.email).localeCompare(String(b.lastName||b.firstName||b.email));
+function hue(s){let h=0;for(const ch of String(s))h=(h*31+ch.charCodeAt(0))>>>0;return COLORS[h%COLORS.length]}
+function initials(n){const w=String(n||'?').replace(/@.*/,'').split(/[\s._-]+/).filter(x=>x&&!/^(dr|mr|mrs|ms|prof)\.?$/i.test(x));return (w.slice(0,2).map(x=>x[0].toUpperCase()).join(''))||'?'}
+function avatar(o,size){size=size||44;const nm=nmOf(o||{});if(o&&o.photo)return '<span class="av" style="width:'+size+'px;height:'+size+'px;background-image:url('+o.photo+')"></span>';return '<span class="av" style="width:'+size+'px;height:'+size+'px;background:'+hue(nm)+';font-size:'+Math.round(size*.38)+'px">'+esc(initials(nm))+'</span>'}
+function logoBox(o,size){if(o.logo)return '<span class="lg" style="width:'+size+'px;height:'+size+'px;background-image:url('+o.logo+')"></span>';return '<span class="lg" style="width:'+size+'px;height:'+size+'px;background:'+hue(o.name)+';border-color:transparent;font-size:'+Math.round(size*.34)+'px">'+esc(initials(o.name))+'</span>'}
+const groupChips=ids=>(ids||[]).map(group).filter(Boolean).map(g=>'<span class="gchip"><i style="background:'+g.color+'"></i>'+esc(g.name)+'</span>').join('');
+const restricted=it=>(it.groups&&it.groups.length)?'<span class="gchips">'+groupChips(it.groups)+'</span>':'';
+const targetChips=n=>n.target.all?'<span class="gchip">Everyone</span>':groupChips(n.target.groups);
+function para(t){return esc(t).split(/\n{2,}/).map(p=>'<p>'+p.replace(/\n/g,'<br>').replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener">$1</a>')+'</p>').join('')}
+const empty=(msg,ic)=>'<div class="empty">'+icon(ic||'doc')+'<p>'+esc(msg)+'</p>'+(isAdmin()?'<p class="hint">Tap + at the top to add content.</p>':'')+'</div>';
+
+/* ---------- Navigation ---------- */
+const nav={tab:'home',stacks:{},roots:{}};
+function resetNav(){nav.tab='home';['home','messages','search','admin','settings'].forEach(k=>{nav.stacks[k]=[];nav.roots[k]={v:k+'Root'}})}
+resetNav();
+const stack=()=>nav.stacks[nav.tab];
+const cur=()=>{const s=stack();return s[s.length-1]||nav.roots[nav.tab]};
+let auth={step:'email'};
+let shown=null;
+function go(v){stack().push(v);render()}
+function back(){stack().pop();render()}
+function setTab(t){if(nav.tab===t)nav.stacks[t]=[];nav.tab=t;render()}
+const FORM_VIEWS=new Set(['edit','compose','addPeople','personEdit','groupEdit','homeSettings','editProfile','chat','newChat']);
+
+function render(){
+ const scr=$('#screen');const c=$('#content');if(shown&&c)shown.scroll=c.scrollTop;
+ const u=me();
+ if(!u){shown=null;scr.innerHTML=renderAuth();renderNav();return}
+ if(nav.tab==='admin'&&u.role!=='admin'){nav.tab='home'}
+ const v=cur();const fn=VIEWS[v.v];
+ scr.innerHTML=fn?fn(v):page('Not found','');
+ shown=v;renderNav();afterRender(v);
+}
+function softRender(){if(!me())return;const v=cur();const a=document.activeElement;if(FORM_VIEWS.has(v.v)||(a&&a.matches&&a.matches('input,textarea,select'))||!$('#modal').hidden){renderNav();return}render()}
+function afterRender(v){
+ const c=$('#content');
+ if(c&&v.scroll)c.scrollTop=v.scroll;
+ if(v.v==='section'&&v.s==='programme'&&!v.didScroll){v.didScroll=1;const live=$('.sess.live');if(live&&c&&!v.scroll){c.scrollTop=Math.max(0,live.offsetTop-c.offsetTop-c.clientHeight/2+live.offsetHeight/2)}}
+ if(v.v==='chat'){const m=$('#msgs');if(m)m.scrollTop=m.scrollHeight}
+ if(v.v==='searchRoot'&&!v.focused){v.focused=1;const q=$('#q');if(q)q.focus()}
+ if(v.v==='homeRoot')fitLabels();
+}
+function fitLabels(){const L=[...document.querySelectorAll('.tile .lbl')];if(!L.length)return;L.forEach(l=>l.style.fontSize='');let k=1;L.forEach(l=>{const max=l.parentElement.offsetWidth+12,w=l.scrollWidth;if(w>max)k=Math.min(k,max/w)});if(k<1){const fs=parseFloat(getComputedStyle(L[0]).fontSize);L.forEach(l=>l.style.fontSize=(fs*k).toFixed(1)+'px')}}
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(fitLabels);
+window.addEventListener('resize',fitLabels);
+function renderNav(){
+ const n=$('#nav');const u=me();if(!u){n.hidden=true;n.innerHTML='';return}
+ n.hidden=false;
+ const tabs=[['home','Home','dots'],['messages','Messages','messages'],['search','Search','search']];
+ if(u.role==='admin')tabs.push(['admin','Admin','admin']);
+ tabs.push(['settings','Settings','settings']);
+ const un=unreadMsgs();
+ n.innerHTML=tabs.map(([k,l,ic])=>'<button data-act="tab" data-t="'+k+'"'+(nav.tab===k?' aria-current="page"':'')+'>'+icon(ic)+'<span>'+l+'</span>'+(k==='messages'&&un?'<span class="badge">'+un+'</span>':'')+'</button>').join('');
+}
+function page(title,body,o){o=o||{};const canBack=stack().length>0;return '<header class="topbar">'+(canBack?'<button class="iconbtn" data-act="back" aria-label="Back">'+icon('back')+'</button>':'<span class="sp0"></span>')+'<h1>'+esc(title)+'</h1>'+(o.right||'<span class="sp"></span>')+'</header><main class="content" id="content">'+body+'</main>'}
+const addBtn=s=>isAdmin()?'<button class="iconbtn" data-act="add" data-s="'+s+'" aria-label="Add">'+icon('plus')+'</button>':'';
+
+/* ---------- Toast, modal, banner ---------- */
+function toast(t){const el=$('#toast');el.textContent=t;el.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>el.classList.remove('show'),2800)}
+function ask(msg,ok){return new Promise(res=>{const m=$('#modal');m.innerHTML='<div class="overlay"><div class="sheet" role="dialog" aria-modal="true"><p class="q">'+esc(msg)+'</p><button class="btn block" data-m="1">'+esc(ok||'Confirm')+'</button><button class="btn block secondary" data-m="0">Cancel</button></div></div>';m.hidden=false;
+ m.onclick=e=>{const b=e.target.closest('[data-m]');if(b||e.target.classList.contains('overlay')){m.hidden=true;m.innerHTML='';m.onclick=null;res(!!b&&b.dataset.m==='1')}}})}
+function showBanner(n,more){const b=$('#banner');b.innerHTML='<button class="nb" data-act="banner">'+APPICON+'<span class="main"><span class="nb-h"><span>Shippax Ferry Conference</span><span>now</span></span><b>'+esc(n.title)+'</b><span class="nb-b">'+esc(n.body)+'</span>'+(more>1?'<span class="nb-more">+'+(more-1)+' more in Announcements</span>':'')+'</span></button>';b.classList.add('show');clearTimeout(showBanner.t);showBanner.t=setTimeout(()=>b.classList.remove('show'),7000)}
+
+/* ---------- Scheduler ---------- */
+function tick(){
+ const t=now().getTime();const fired=[];
+ S.notifs.forEach(n=>{if(n.status==='scheduled'&&n.sendAt<=t){n.status='sent';n.sentAt=n.sendAt;fired.push(n)}});
+ if(!fired.length)return;
+ save();const u=me();
+ const mine=fired.filter(n=>isRecipient(n,u)).sort((a,b)=>a.sentAt-b.sentAt);
+ if(u&&mine.length&&u.push!==false)showBanner(mine[mine.length-1],mine.length);
+ softRender();
+}
+
+/* ---------- Home ---------- */
+function logoHTML(){if(S.settings.logo)return '<img class="logo-img" src="'+S.settings.logo+'" alt="Shippax Ferry Conference">';return '<div class="logo" role="img" aria-label="Shippax Ferry Conference"><div class="logo-top"><span class="logo-word">SHIPPAX</span>'+SWOOSH+'</div><div class="logo-sub">FERRY CONFERENCE</div></div>'}
+function homeWrap(inner,cls){const bg=S.settings.bg;return '<div class="home-wrap'+(bg?' photo':'')+'"'+(bg?' style="background-image:url('+bg+')"':'')+'>'+(bg?'':SCENE)+fsButton()+'<div class="home" id="content"><div class="home-inner '+(cls||'')+'">'+inner+'</div></div></div>'}
+const fsEl=()=>document.fullscreenElement||document.webkitFullscreenElement||null;
+function fsButton(){const on=!!fsEl();return '<button class="fsbtn" data-act="fs" aria-label="'+(on?'Exit full screen':'Full screen')+'">'+icon(on?'shrink':'expand')+'</button>'}
+async function toggleFs(){
+ try{
+  if(fsEl()){const ex=document.exitFullscreen||document.webkitExitFullscreen;if(ex)await ex.call(document);return}
+  const el=document.documentElement;const req=el.requestFullscreen||el.webkitRequestFullscreen;
+  if(!req||!(document.fullscreenEnabled||document.webkitFullscreenEnabled))throw new Error('unavailable');
+  await req.call(el,{navigationUI:'hide'});
+ }catch(e){toast("Full screen isn't allowed in this view. Open the app's link in your phone's browser and tap the button there.")}
+}
+function syncFs(){const on=!!fsEl();document.querySelectorAll('.fsbtn').forEach(b=>{b.innerHTML=icon(on?'shrink':'expand');b.setAttribute('aria-label',on?'Exit full screen':'Full screen')});document.querySelectorAll('.fs-label').forEach(l=>l.textContent=on?'Exit full screen':'Full screen');setTimeout(fitLabels,150)}
+document.addEventListener('fullscreenchange',syncFs);document.addEventListener('webkitfullscreenchange',syncFs);
+function nowStrip(){
+ const n=now();const L=sessions();const live=L.find(s=>sStart(s)<=n&&n<sEnd(s));
+ if(live)return '<button class="nowpill" data-act="open" data-s="programme"><span class="dot"></span><b>NOW</b><span class="tm">'+live.start+'–'+live.end+'</span><span class="tt">'+esc(live.title)+'</span></button>';
+ const next=L.find(s=>sStart(s)>n);
+ if(next&&sStart(next)-n<3*36e5)return '<button class="nowpill" data-act="open" data-s="programme"><b>NEXT</b><span class="tm">'+next.start+'</span><span class="tt">'+esc(next.title)+'</span></button>';
+ return '';
+}
+const VIEWS={};
+VIEWS.homeRoot=()=>{
+ const ua=unreadAnn();
+ const tiles=S.tiles.filter(t=>!t.hidden).map(t=>'<button class="tile" data-act="open" data-s="'+t.id+'"><span class="sq">'+icon(t.id)+(t.id==='announcements'&&ua?'<span class="tbadge">'+ua+'</span>':'')+'</span><span class="lbl">'+esc(t.label)+'</span></button>').join('');
+ return homeWrap(logoHTML()+nowStrip()+'<nav class="grid" aria-label="Conference sections">'+tiles+'</nav>');
+};
+
+/* ---------- Sections ---------- */
+const SEC={};
+VIEWS.section=v=>(SEC[v.s]||(()=>page(tileLabel(v.s),empty('Nothing here yet.'))))(v);
+function countdownCard(first,n){const ms=sStart(first)-n;const d=Math.floor(ms/864e5),h=Math.floor(ms/36e5),m=Math.max(1,Math.ceil(ms/6e4));const txt=d>=2?d+' days':h>=2?h+' hours':m+' minutes';return '<div class="now"><span class="k">Starts in '+txt+'</span>'+(S.settings.tagline?'<h2>'+esc(S.settings.tagline)+'</h2>':'')+'<p>First session: '+esc(first.title)+', '+fmtDayLong(first.date)+' at '+first.start+'</p></div>'}
+function spkNames(s){return (s.speakers||[]).map(id=>findItem('speakers',id)).filter(Boolean).map(p=>p.name).join(', ')}
+function nowCard(s,n){const a=sStart(s),b=sEnd(s);const pct=Math.min(100,Math.max(0,(n-a)/(b-a)*100));const left=Math.ceil((b-n)/6e4);const sp=spkNames(s);
+ return '<button class="now" data-act="item" data-s="programme" data-id="'+s.id+'"><span class="k"><span class="dot"></span>Now on</span><span class="h2">'+esc(s.title)+'</span><span class="m">'+s.start+'–'+s.end+(s.location?' · '+esc(s.location):'')+'</span>'+(sp?'<span class="m">'+esc(sp)+'</span>':'')+'<span class="bar"><i style="width:'+pct.toFixed(1)+'%"></i></span><span class="m small">'+(left>60?Math.floor(left/60)+' h '+(left%60)+' min':left+' min')+' left</span></button>'}
+function nextCard(s,label){return '<button class="nextc" data-act="item" data-s="programme" data-id="'+s.id+'"><span class="k2">'+(label||'Up next')+' · '+(s.date!==ymd(now())?fmtDay(s.date)+', ':'')+s.start+'</span><span class="t">'+esc(s.title)+'</span>'+(s.location?'<span class="s">'+esc(s.location)+'</span>':'')+'</button>'}
+SEC.programme=v=>{
+ const L=sessions();const n=now();
+ if(!L.length)return page(tileLabel('programme'),empty('The programme will be published soon.','programme'),{right:addBtn('programme')});
+ const days=[...new Set(L.map(s=>s.date))].sort();const today=ymd(n);
+ if(!v.day||!days.includes(v.day))v.day=days.includes(today)?today:days[0];
+ const live=L.filter(s=>sStart(s)<=n&&n<sEnd(s));const next=L.find(s=>sStart(s)>n);
+ let top='';
+ if(live.length)top=live.map(s=>nowCard(s,n)).join('')+(next?nextCard(next):'');
+ else if(n<sStart(L[0]))top=countdownCard(L[0],n);
+ else if(!next)top='<div class="card"><span class="t">The conference has ended</span><span class="s">Thank you for joining us on board.</span></div>';
+ else top=nextCard(next);
+ const tabs=days.length>1?'<div class="seg" role="tablist" aria-label="Conference days">'+days.map((d,i)=>'<button data-act="day" data-d="'+d+'" aria-pressed="'+(d===v.day)+'">Day '+(i+1)+' · '+fmtDay(d).slice(4)+'</button>').join('')+'</div>':'';
+ const rows=L.filter(s=>s.date===v.day).map(s=>{const isLive=sStart(s)<=n&&n<sEnd(s),past=sEnd(s)<=n;const sp=spkNames(s);
+  return '<button class="sess'+(isLive?' live':'')+(past?' past':'')+'" data-act="item" data-s="programme" data-id="'+s.id+'"><span class="time">'+s.start+'<small>'+s.end+'</small></span><span class="main"><span class="t">'+esc(s.title)+(isLive?' <span class="pill red sm">Now</span>':'')+'</span>'+((s.location||sp)?'<span class="s">'+esc([s.location,sp].filter(Boolean).join(' · '))+'</span>':'')+restricted(s)+'</span>'+chev+'</button>'}).join('');
+ return page(tileLabel('programme'),top+tabs+'<div class="sec-h">'+fmtDayLong(v.day)+'</div><div class="list">'+rows+'</div>',{right:addBtn('programme')});
+};
+SEC.speakers=()=>{const L=items('speakers').filter(canSee);return page(tileLabel('speakers'),L.length?'<div class="list">'+L.map(p=>'<button class="row" data-act="item" data-s="speakers" data-id="'+p.id+'">'+avatar(p,50)+'<span class="main"><span class="t">'+esc(p.name)+'</span><span class="s">'+esc([p.title,p.company].filter(Boolean).join(', '))+'</span>'+restricted(p)+'</span>'+chev+'</button>').join('')+'</div>':empty('Speakers will be announced soon.','speakers'),{right:addBtn('speakers')})};
+SEC.sponsors=()=>{const L=items('sponsors').filter(canSee);let h='';[['Main sponsor','Main sponsors'],['Sponsor','Sponsors & exhibitors'],['Partner','Partners']].forEach(([tr,hd])=>{const g=L.filter(x=>(['Main sponsor','Partner'].includes(x.tier)?x.tier:'Sponsor')===tr);if(!g.length)return;h+='<div class="sec-h">'+hd+'</div><div class="spons'+(tr==='Main sponsor'?' big':'')+'">'+g.map(o=>'<button class="spon" data-act="item" data-s="sponsors" data-id="'+o.id+'">'+logoBox(o,tr==='Main sponsor'?80:56)+'<span>'+esc(o.name)+'</span>'+restricted(o)+'</button>').join('')+'</div>'});return page(tileLabel('sponsors'),h||empty('Sponsors will be presented here.','sponsors'),{right:addBtn('sponsors')})};
+SEC.exhibitors=()=>{const L=items('exhibitors').filter(canSee).sort((a,b)=>a.name.localeCompare(b.name));return page(tileLabel('exhibitors'),L.length?'<div class="list">'+L.map(o=>'<button class="row" data-act="item" data-s="exhibitors" data-id="'+o.id+'">'+logoBox(o,46)+'<span class="main"><span class="t">'+esc(o.name)+'</span>'+(o.description?'<span class="s one">'+esc(o.description)+'</span>':'')+restricted(o)+'</span>'+(o.stand?'<span class="stand">Stand '+esc(o.stand)+'</span>':'')+'</button>').join('')+'</div>':empty('Exhibitors will be listed here.','exhibitors'),{right:addBtn('exhibitors')})};
+SEC.goodtoknow=()=>{const L=items('goodtoknow').filter(canSee);return page(tileLabel('goodtoknow'),L.length?'<div class="list">'+L.map(a=>'<button class="row" data-act="item" data-s="goodtoknow" data-id="'+a.id+'"><span class="row-ic soft">'+icon('goodtoknow')+'</span><span class="main"><span class="t">'+esc(a.title)+'</span><span class="s one">'+esc(String(a.body||'').split('\n')[0])+'</span>'+restricted(a)+'</span>'+chev+'</button>').join('')+'</div>':empty('Practical information will appear here.','goodtoknow'),{right:addBtn('goodtoknow')})};
+SEC.timetable=()=>{const L=items('timetable').filter(canSee).sort((a,b)=>dParse(a.date,a.time)-dParse(b.date,b.time));const n=now();const days=[...new Set(L.map(x=>x.date))];
+ const h=days.map(d=>'<div class="sec-h">'+fmtDayLong(d)+'</div><div class="list">'+L.filter(x=>x.date===d).map(x=>{const past=dParse(x.date,x.time)<n;const inner='<span class="tt-time">'+esc(x.time)+'</span><span class="main"><span class="t">'+esc(x.title)+'</span>'+(x.note?'<span class="s">'+esc(x.note)+'</span>':'')+restricted(x)+'</span>';return isAdmin()?'<button class="row tt'+(past?' past':'')+'" data-act="editItem" data-s="timetable" data-id="'+x.id+'">'+inner+icon('edit','chev')+'</button>':'<div class="row tt'+(past?' past':'')+'">'+inner+'</div>'}).join('')+'</div>').join('');
+ return page(tileLabel('timetable'),(h||empty('The timetable will be published soon.','timetable'))+'<p class="note">'+icon('info')+'<span>Draft times, to be confirmed when the official timetable is published. Times are local time on board.</span></p>',{right:addBtn('timetable')})};
+SEC.excursions=()=>{const L=items('excursions').filter(canSee).sort((a,b)=>dParse(a.date,a.start)-dParse(b.date,b.start));return page(tileLabel('excursions'),L.length?L.map(e=>'<button class="exc" data-act="item" data-s="excursions" data-id="'+e.id+'">'+(e.image?'<span class="exc-img" style="background-image:url('+e.image+')"></span>':'<span class="exc-img ph">'+icon('excursions')+'</span>')+'<span class="exc-body"><span class="t">'+esc(e.title)+'</span><span class="s">'+fmtDay(e.date)+(e.start?' · '+e.start+(e.end?'–'+e.end:''):'')+'</span>'+(e.meeting?'<span class="s">Meeting point: '+esc(e.meeting)+'</span>':'')+restricted(e)+'</span></button>').join(''):empty('Excursions will be announced here.','excursions'),{right:addBtn('excursions')})};
+function personRow(u,act){return '<button class="row" data-act="'+(act||'profile')+'" data-uid="'+u.id+'">'+avatar(u,48)+'<span class="main"><span class="t">'+esc(uname(u))+(u.id===S.me?' <span class="you">(you)</span>':'')+(u.role==='admin'?' <span class="pill red sm">Organiser</span>':'')+'</span><span class="s one">'+esc([u.title,u.company].filter(Boolean).join(', '))+'</span></span>'+chev+'</button>'}
+const directory=()=>S.users.filter(u=>u.status==='active'&&(u.visible!==false||u.id===S.me)).sort(byName);
+function matchQ(q,...f){q=String(q||'').toLowerCase().trim();return !q||f.join(' ').toLowerCase().includes(q)}
+function delegateRows(q){const L=directory().filter(u=>matchQ(q,uname(u),u.title,u.company));return L.length?L.map(u=>personRow(u)).join(''):'<p class="hint pad">No one matches “'+esc(q)+'”.</p>'}
+SEC.delegates=v=>{const n=directory().length;return page(tileLabel('delegates'),'<input type="search" class="search" placeholder="Search name, company or title" aria-label="Search delegates" data-filter="delegates" value="'+esc(v.q||'')+'"><p class="hint">'+n+' people on board. Tap someone to see their profile or send a message.</p><div class="list" id="dlist">'+delegateRows(v.q)+'</div>',{right:addBtn('delegates')})};
+SEC.announcements=()=>{
+ const u=me();const L=S.notifs.filter(n=>n.status==='sent'&&(isAdmin()||isRecipient(n,u))).sort((a,b)=>b.sentAt-a.sentAt);
+ const last=(S.reads[u.id]||{}).ann||0;
+ if(L.length&&L[0].sentAt>last){S.reads[u.id]=Object.assign({},S.reads[u.id],{ann:L[0].sentAt});save()}
+ const sch=S.notifs.filter(n=>n.status==='scheduled').length;
+ const top=isAdmin()?'<div class="list"><button class="row" data-act="go" data-v="notifList"><span class="row-ic">'+icon('clock')+'</span><span class="main"><span class="t">'+sch+' scheduled '+(sch===1?'message':'messages')+'</span><span class="s">Manage push messages</span></span>'+chev+'</button></div>':'';
+ const body=L.length?'<div class="list">'+L.map(n=>'<div class="ann'+(n.sentAt>last&&isRecipient(n,u)?' new':'')+'"><span class="ann-ic">'+icon('announcements')+'</span><span class="main"><span class="ann-h"><b>'+esc(n.title)+(n.sentAt>last&&isRecipient(n,u)?' <span class="pill red sm">New</span>':'')+'</b><time>'+fmtWhen(n.sentAt)+'</time></span><span class="ann-b">'+para(n.body)+'</span>'+(isAdmin()?'<span class="gchips">'+targetChips(n)+'</span>':'')+'</span></div>').join('')+'</div>':empty('Important information from the organisers will appear here.','announcements');
+ return page(tileLabel('announcements'),top+body,{right:addBtn('announcements')});
+};
+
+/* ---------- Item detail ---------- */
+const DETAIL={};
+VIEWS.item=v=>{const it=findItem(v.s,v.id);if(!it)return page(tileLabel(v.s),empty('This has been removed.'));const right=isAdmin()?'<button class="iconbtn" data-act="editItem" data-s="'+v.s+'" data-id="'+v.id+'" aria-label="Edit">'+icon('edit')+'</button>':'';return page(tileLabel(v.s),DETAIL[v.s](it),{right})};
+const resRow=(s,id,title,sub,ic)=>'<button class="row" data-act="item" data-s="'+s+'" data-id="'+id+'"><span class="row-ic soft">'+icon(ic)+'</span><span class="main"><span class="t">'+esc(title)+'</span><span class="s">'+esc(sub)+'</span></span>'+chev+'</button>';
+DETAIL.programme=s=>{const n=now();const live=sStart(s)<=n&&n<sEnd(s);const sp=(s.speakers||[]).map(id=>findItem('speakers',id)).filter(Boolean);
+ return '<div class="card hero"><div class="kicker">'+fmtDayLong(s.date)+' · '+s.start+'–'+s.end+'</div><h2>'+esc(s.title)+'</h2>'+(live?'<span class="pill red">Now on</span>':'')+(s.location?'<div class="meta">'+icon('pin')+'<span>'+esc(s.location)+'</span></div>':'')+restricted(s)+'</div>'
+ +(s.description?'<div class="card prose">'+para(s.description)+'</div>':'')
+ +(sp.length?'<div class="sec-h">'+(sp.length>1?'Speakers':'Speaker')+'</div><div class="list">'+sp.map(p=>'<button class="row" data-act="item" data-s="speakers" data-id="'+p.id+'">'+avatar(p,44)+'<span class="main"><span class="t">'+esc(p.name)+'</span><span class="s">'+esc([p.title,p.company].filter(Boolean).join(', '))+'</span></span>'+chev+'</button>').join('')+'</div>':'')};
+DETAIL.speakers=p=>{const ss=sessions().filter(s=>(s.speakers||[]).includes(p.id));
+ return '<div class="person">'+avatar(p,112)+'<h2>'+esc(p.name)+'</h2>'+(p.title?'<span class="s">'+esc(p.title)+'</span>':'')+(p.company?'<span class="s strong">'+esc(p.company)+'</span>':'')+'</div>'+(p.bio?'<div class="card prose">'+para(p.bio)+'</div>':'')
+ +(ss.length?'<div class="sec-h">Sessions</div><div class="list">'+ss.map(s=>resRow('programme',s.id,s.title,fmtDay(s.date)+' · '+s.start+'–'+s.end+(s.location?' · '+s.location:''),'clock')).join('')+'</div>':'')};
+function orgDetail(o,kind){return '<div class="card org">'+logoBox(o,96)+'<h2>'+esc(o.name)+'</h2>'+(kind==='sponsors'&&o.tier?'<span class="pill '+(o.tier==='Main sponsor'?'gold':'grey')+'">'+esc(o.tier)+'</span>':'')+(kind==='exhibitors'&&o.stand?'<span class="pill grey">Stand '+esc(o.stand)+'</span>':'')+restricted(o)+'</div>'+(o.description?'<div class="card prose">'+para(o.description)+'</div>':'')+(o.website?'<a class="btn secondary block" href="'+esc(o.website)+'" target="_blank" rel="noopener">'+icon('link')+'<span>'+esc(o.website.replace(/^https?:\/\//,'').replace(/\/$/,''))+'</span></a>':'')}
+DETAIL.sponsors=o=>orgDetail(o,'sponsors');
+DETAIL.exhibitors=o=>orgDetail(o,'exhibitors');
+DETAIL.goodtoknow=a=>(a.image?'<div class="wide-img" style="background-image:url('+a.image+')"></div>':'')+'<div class="card"><h2 style="margin:0 0 10px;font-size:23px;line-height:1.22">'+esc(a.title)+'</h2><div class="prose">'+para(a.body||'')+'</div>'+restricted(a)+'</div>';
+DETAIL.excursions=e=>(e.image?'<div class="wide-img" style="background-image:url('+e.image+')"></div>':'')+'<div class="card hero"><div class="kicker">'+fmtDayLong(e.date)+(e.start?' · '+e.start+(e.end?'–'+e.end:''):'')+'</div><h2>'+esc(e.title)+'</h2>'+(e.meeting?'<div class="meta">'+icon('pin')+'<span>Meeting point: '+esc(e.meeting)+'</span></div>':'')+restricted(e)+'</div>'+(e.description?'<div class="card prose">'+para(e.description)+'</div>':'');
+DETAIL.timetable=x=>'<div class="card hero"><div class="kicker">'+fmtDayLong(x.date)+' · '+esc(x.time)+'</div><h2>'+esc(x.title)+'</h2>'+(x.note?'<p class="s">'+esc(x.note)+'</p>':'')+'</div>';
+
+/* ---------- Generic editor ---------- */
+function chip(v,l,on,color){return '<button type="button" class="chip" data-act="chip" data-v="'+v+'" aria-pressed="'+(!!on)+'">'+(color?'<i style="background:'+color+'"></i>':'')+esc(l)+'</button>'}
+function imageField(fd,val){return '<div class="field"><span class="lbl">'+esc(fd.l)+' <span class="opt">optional</span></span><div class="imgpick '+fd.shape+'" data-k="'+fd.k+'"><div class="imgprev"'+(val?' style="background-image:url('+val+')"':'')+'>'+(val?'':icon('camera'))+'</div><div class="imgbtns"><label class="btn secondary sm"><span class="up-lbl">'+(val?'Replace':'Upload')+'</span><input type="file" accept="image/*" data-img="'+fd.k+'" data-shape="'+fd.shape+'" hidden></label><button type="button" class="btn ghost sm" data-act="imgClear" data-k="'+fd.k+'"'+(val?'':' hidden')+'>Remove</button></div></div></div>'}
+function fieldHTML(fd,val){
+ const id='f_'+fd.k,cls='field'+(fd.half?' half':'');
+ const lab='<label for="'+id+'">'+esc(fd.l)+(fd.req?'':' <span class="opt">optional</span>')+'</label>';
+ switch(fd.t){
+  case 'text':case 'date':case 'time':return '<div class="'+cls+'">'+lab+'<input id="'+id+'" name="'+fd.k+'" type="'+fd.t+'" value="'+esc(val||'')+'"'+(fd.req?' required':'')+'></div>';
+  case 'url':return '<div class="'+cls+'">'+lab+'<input id="'+id+'" name="'+fd.k+'" type="text" inputmode="url" placeholder="www.example.com" value="'+esc(val||'')+'"></div>';
+  case 'textarea':return '<div class="'+cls+'">'+lab+'<textarea id="'+id+'" name="'+fd.k+'" rows="'+(fd.rows||5)+'">'+esc(val||'')+'</textarea></div>';
+  case 'select':return '<div class="'+cls+'">'+lab+'<select id="'+id+'" name="'+fd.k+'">'+fd.opts.map(o=>'<option'+(o===val?' selected':'')+'>'+esc(o)+'</option>').join('')+'</select></div>';
+  case 'image':return imageField(fd,val);
+  case 'speakers':{const L=items('speakers');return '<div class="field"><span class="lbl">'+esc(fd.l)+' <span class="opt">optional</span></span>'+(L.length?'<div class="chips" data-chipset="speakers">'+L.map(p=>chip(p.id,p.name,(val||[]).includes(p.id))).join('')+'</div>':'<p class="hint">Add speakers in the Speakers section first.</p>')+'</div>'}
+  case 'groups':return '<div class="field"><span class="lbl">'+esc(fd.l)+'</span><div class="chips" data-chipset="groups">'+S.groups.map(g=>chip(g.id,g.name,(val||[]).includes(g.id),g.color)).join('')+'</div><p class="hint">Leave all unselected to show this to everyone.</p></div>';
+ }
+ return '';
+}
+VIEWS.edit=v=>{const sc=SCHEMA[v.s];const ex=v.id?findItem(v.s,v.id):null;
+ if(!v.draft)v.draft=ex?JSON.parse(JSON.stringify(ex)):(v.s==='programme'||v.s==='timetable'||v.s==='excursions'?{date:(sessions()[0]||{}).date||ymd(now())}:{});
+ return page((ex?'Edit ':'New ')+sc.noun,'<form class="form" data-form="item" novalidate>'+sc.fields.map(fd=>fieldHTML(fd,v.draft[fd.k])).join('')+'<div class="actions">'+(ex?'<button type="button" class="btn danger" data-act="delItem">Delete</button>':'')+'<button class="btn" type="submit">Save</button></div></form>')};
+const chipVals=(form,set)=>[...form.querySelectorAll('[data-chipset="'+set+'"] [aria-pressed="true"]')].map(b=>b.dataset.v);
+const segVal=(form,name)=>{const b=form.querySelector('[data-seg="'+name+'"] [aria-pressed="true"]');return b?b.dataset.v:null};
+function getDraft(){if(!me())return auth.draft||(auth.draft={});const v=cur();return v.draft||(v.draft={})}
+
+/* ---------- Profiles ---------- */
+VIEWS.profile=v=>{const u=user(v.uid);if(!u)return page('Profile',empty('This person is no longer on the list.'));const self=u.id===S.me;
+ return page(uname(u),'<div class="person">'+avatar(u,112)+'<h2>'+esc(uname(u))+'</h2>'+(u.title?'<span class="s">'+esc(u.title)+'</span>':'')+(u.company?'<span class="s strong">'+esc(u.company)+'</span>':'')+(u.role==='admin'?'<span style="margin-top:6px"><span class="pill red">Organiser</span></span>':'')
+ +'<div class="person-actions">'+(self?'<button class="btn secondary" data-act="go" data-v="editProfile">'+icon('edit')+'Edit profile</button>':'<button class="btn" data-act="msgUser" data-uid="'+u.id+'">'+icon('messages')+'Send message</button>')+(isAdmin()&&!self?'<button class="btn secondary" data-act="go" data-v="personEdit" data-uid="'+u.id+'">Manage</button>':'')+'</div></div>'
+ +(u.bio?'<div class="card prose">'+para(u.bio)+'</div>':'')
+ +(u.linkedin?'<a class="btn secondary block" href="'+esc(u.linkedin)+'" target="_blank" rel="noopener">'+icon('link')+'<span>LinkedIn profile</span></a>':'')
+ +(isAdmin()?'<div class="card kv"><span>Visible to admins only</span><b>'+esc(u.email)+'</b>'+(u.groups&&u.groups.length?'<div class="gchips">'+groupChips(u.groups)+'</div>':'')+'</div>':''))};
+function profileForm(d,label,formName,email){return '<form class="form" data-form="'+formName+'">'+(email?'<p class="hint">Signed in as <b>'+esc(email)+'</b></p>':'')
+ +imageField({k:'photo',l:'Profile photo',shape:'round'},d.photo)
+ +'<div class="field half"><label for="p_fn">First name</label><input id="p_fn" name="firstName" required autocomplete="given-name" value="'+esc(d.firstName||'')+'"></div>'
+ +'<div class="field half"><label for="p_ln">Last name</label><input id="p_ln" name="lastName" autocomplete="family-name" value="'+esc(d.lastName||'')+'"></div>'
+ +'<div class="field"><label for="p_ti">Job title</label><input id="p_ti" name="title" required autocomplete="organization-title" value="'+esc(d.title||'')+'"></div>'
+ +'<div class="field"><label for="p_co">Company</label><input id="p_co" name="company" required autocomplete="organization" value="'+esc(d.company||'')+'"></div>'
+ +'<div class="field"><label for="p_bio">Short bio <span class="opt">optional</span></label><textarea id="p_bio" name="bio" rows="4" maxlength="300" data-counter placeholder="A few lines about your role and what you work on">'+esc(d.bio||'')+'</textarea><span class="count">'+String(d.bio||'').length+'/300</span></div>'
+ +'<div class="field"><label for="p_li">LinkedIn profile <span class="opt">optional</span></label><input id="p_li" name="linkedin" inputmode="url" placeholder="linkedin.com/in/your-name" value="'+esc(d.linkedin||'')+'"></div>'
+ +'<label class="toggle-row"><span><b>Show me in the delegate list</b><small>Other delegates can find you and send you messages.</small></span><input type="checkbox" class="switch" name="visible"'+(d.visible!==false?' checked':'')+'></label>'
+ +'<label class="toggle-row"><span><b>Push notifications</b><small>Important information from the organisers.</small></span><input type="checkbox" class="switch" name="push"'+(d.push!==false?' checked':'')+'></label>'
+ +'<button class="btn block" type="submit">'+esc(label)+'</button></form>'}
+function readProfile(form,d){const f=new FormData(form);['firstName','lastName','title','company','bio','linkedin'].forEach(k=>d[k]=String(f.get(k)||'').trim());d.visible=form.elements.visible.checked;d.push=form.elements.push.checked;
+ if(d.linkedin&&!/^https?:\/\//i.test(d.linkedin))d.linkedin='https://'+d.linkedin;
+ for(const [k,l] of [['firstName','first name'],['title','job title'],['company','company']])if(!d[k]){toast('Please add your '+l+'.');return false}return true}
+const PROFILE_KEYS=['photo','firstName','lastName','title','company','bio','linkedin','visible','push'];
+VIEWS.editProfile=v=>{const u=me();if(!v.draft){v.draft={};PROFILE_KEYS.forEach(k=>v.draft[k]=u[k])}return page('Edit profile',profileForm(v.draft,'Save profile','editProfile',u.email))};
+
+/* ---------- Messages ---------- */
+VIEWS.messagesRoot=()=>{const id=S.me;const L=S.convs.filter(c=>c.members.includes(id)&&c.msgs.length&&c.members.every(user)).sort((a,b)=>lastMsg(b).at-lastMsg(a).at);
+ const rows=L.map(c=>{const o=user(c.members.find(x=>x!==id));const m=lastMsg(c);const un=unreadIn(c,id);return '<button class="row" data-act="chat" data-cid="'+c.id+'">'+avatar(o,50)+'<span class="main"><span class="row-h"><span class="t">'+esc(uname(o))+'</span><time>'+fmtWhen(m.at)+'</time></span><span class="s one'+(un?' strong':'')+'">'+(m.from===id?'You: ':'')+esc(m.text)+'</span></span>'+(un?'<span class="count-badge">'+un+'</span>':'')+'</button>'}).join('');
+ return page('Messages',L.length?'<div class="list">'+rows+'</div>':'<div class="empty">'+icon('messages')+'<p>No messages yet. Find someone in the delegate list and say hello.</p><button class="btn" data-act="go" data-v="newChat">Start a conversation</button></div>',{right:'<button class="iconbtn" data-act="go" data-v="newChat" aria-label="New message">'+icon('edit')+'</button>'})};
+function pickRows(q){const L=S.users.filter(u=>u.status==='active'&&u.id!==S.me&&(u.visible!==false||isAdmin())).filter(u=>matchQ(q,uname(u),u.title,u.company)).sort(byName);return L.length?L.map(u=>personRow(u,'msgUser')).join(''):'<p class="hint pad">No one matches “'+esc(q)+'”.</p>'}
+VIEWS.newChat=v=>page('New message','<input type="search" class="search" placeholder="Search delegates" aria-label="Search delegates" data-filter="newchat" value="'+esc(v.q||'')+'"><div class="list" id="ulist">'+pickRows(v.q)+'</div>');
+function msgsHTML(c,o){if(!c.msgs.length)return '<p class="chat-empty">Say hello to '+esc(uname(o))+'.</p>';let h='',prev=0;c.msgs.forEach(m=>{if(m.at-prev>30*6e4)h+='<div class="stamp">'+fmtWhen(m.at)+'</div>';prev=m.at;h+='<div class="bubble '+(m.from===S.me?'me':'them')+'">'+esc(m.text)+'</div>'});return h}
+VIEWS.chat=v=>{const c=S.convs.find(x=>x.id===v.cid);if(!c)return page('Message',empty('This conversation is no longer available.'));const o=user(c.members.find(x=>x!==S.me))||{};
+ const l=lastMsg(c);if(l&&(c.read[S.me]||0)<l.at){c.read[S.me]=l.at;save()}
+ return '<header class="topbar"><button class="iconbtn" data-act="back" aria-label="Back">'+icon('back')+'</button><button class="chat-who" data-act="profile" data-uid="'+o.id+'">'+avatar(o,36)+'<span><b>'+esc(uname(o))+'</b><small>'+esc([o.title,o.company].filter(Boolean).join(', '))+'</small></span></button></header>'
+ +'<div class="chat"><div class="msgs" id="msgs">'+msgsHTML(c,o)+'</div><form class="composer" data-form="msg"><textarea id="msgInput" name="text" rows="1" placeholder="Write a message" aria-label="Message"></textarea><button class="send" aria-label="Send">'+icon('send')+'</button></form></div>'};
+function openChat(uid){let c=S.convs.find(x=>x.members.includes(S.me)&&x.members.includes(uid));if(!c){c={id:nid(),members:[S.me,uid],msgs:[],read:{}};S.convs.push(c)}if(cur().v==='newChat')stack().pop();go({v:'chat',cid:c.id})}
+function autosize(t){t.style.height='auto';t.style.height=Math.min(130,t.scrollHeight+2)+'px'}
+
+/* ---------- Search ---------- */
+function searchResults(q){q=String(q||'').trim();if(q.length<2)return '<p class="hint">Search the programme, speakers, delegates, sponsors, exhibitors and practical information.</p>';
+ const has=(...f)=>matchQ(q,...f);
+ const G=[
+  ['Programme',sessions().filter(s=>has(s.title,s.location,s.description,spkNames(s))).map(s=>resRow('programme',s.id,s.title,fmtDay(s.date)+' · '+s.start+'–'+s.end,'clock'))],
+  ['Speakers',items('speakers').filter(canSee).filter(p=>has(p.name,p.title,p.company,p.bio)).map(p=>'<button class="row" data-act="item" data-s="speakers" data-id="'+p.id+'">'+avatar(p,40)+'<span class="main"><span class="t">'+esc(p.name)+'</span><span class="s">'+esc([p.title,p.company].filter(Boolean).join(', '))+'</span></span>'+chev+'</button>')],
+  ['Delegates',directory().filter(u=>has(uname(u),u.title,u.company)).map(u=>personRow(u))],
+  ['Sponsors',items('sponsors').filter(canSee).filter(o=>has(o.name,o.description)).map(o=>resRow('sponsors',o.id,o.name,o.tier||'Sponsor','sponsors'))],
+  ['Exhibitors',items('exhibitors').filter(canSee).filter(o=>has(o.name,o.description)).map(o=>resRow('exhibitors',o.id,o.name,o.stand?'Stand '+o.stand:'Exhibitor','exhibitors'))],
+  ['Good to know',items('goodtoknow').filter(canSee).filter(a=>has(a.title,a.body)).map(a=>resRow('goodtoknow',a.id,a.title,String(a.body||'').split('\n')[0],'goodtoknow'))],
+  ['Excursions',items('excursions').filter(canSee).filter(e=>has(e.title,e.description,e.meeting)).map(e=>resRow('excursions',e.id,e.title,fmtDay(e.date)+(e.start?' · '+e.start:''),'excursions'))],
+  ['Timetable',items('timetable').filter(canSee).filter(x=>has(x.title,x.note)).map(x=>'<button class="row" data-act="open" data-s="timetable"><span class="row-ic soft">'+icon('timetable')+'</span><span class="main"><span class="t">'+esc(x.title)+'</span><span class="s">'+fmtDay(x.date)+' · '+esc(x.time)+'</span></span>'+chev+'</button>')]];
+ const out=G.filter(g=>g[1].length).map(([h,r])=>'<div class="sec-h">'+h+'</div><div class="list">'+r.join('')+'</div>').join('');
+ return out||'<p class="hint">No results for “'+esc(q)+'”.</p>'}
+VIEWS.searchRoot=v=>page('Search','<input type="search" class="search" id="q" placeholder="Search sessions, people, sponsors…" aria-label="Search" data-filter="global" value="'+esc(v.q||'')+'"><div class="stack" id="results">'+searchResults(v.q)+'</div>');
+
+/* ---------- Settings ---------- */
+const QUICK=[['2027-04-20','14:40','Day 1, 14:40'],['2027-04-20','16:30','Day 1, 16:30'],['2027-04-21','12:59','Day 2, 12:59'],['2027-04-22','09:00','Day 3, 09:00']];
+VIEWS.settingsRoot=()=>{const u=me();const n=now();const off=!!S.settings.clockOffset;
+ return page('Settings','<button class="card row" data-act="go" data-v="editProfile" style="border-top:1px solid var(--line)">'+avatar(u,58)+'<span class="main"><span class="t">'+esc(uname(u))+'</span><span class="s">'+esc([u.title,u.company].filter(Boolean).join(', ')||u.email)+'</span><span class="s" style="color:var(--red);font-weight:600">Edit profile</span></span>'+chev+'</button>'
+ +'<div class="list"><label class="toggle-row"><span><b>Push notifications</b><small>Important information from the organisers</small></span><input type="checkbox" class="switch" data-toggle="push"'+(u.push!==false?' checked':'')+'></label><label class="toggle-row"><span><b>Show me in the delegate list</b><small>Other delegates can find you and message you</small></span><input type="checkbox" class="switch" data-toggle="visible"'+(u.visible!==false?' checked':'')+'></label></div>'
+ +'<div class="list fs-row"><button class="row" data-act="fs">'+icon(fsEl()?'shrink':'expand')+'<span class="main"><span class="t fs-label">'+(fsEl()?'Exit full screen':'Full screen')+'</span><span class="s">Hide the browser bars while you use the app</span></span></button></div>'
+ +'<div class="sec-h">Prototype controls</div>'
+ +'<div class="card stack"><div><span class="s">App date and time</span><span class="t">'+fmtDT(n.getTime())+(off?' <span class="pill amber sm">Preview</span>':'')+'</span></div><p class="hint">Jump to a moment in the conference to see the programme highlight the current session and scheduled push messages arrive. Day 2, 12:59 shows the walking tour reminder arriving after about a minute.</p><div class="chips">'+QUICK.map(q=>'<button type="button" class="chip" data-act="jump" data-d="'+q[0]+'" data-t="'+q[1]+'">'+q[2]+'</button>').join('')+'</div><div class="two"><input type="datetime-local" id="dtl" aria-label="Custom date and time" value="'+ymd(n)+'T'+hm(n)+'"><button type="button" class="btn secondary" data-act="jumpCustom">Set time</button></div>'+(off?'<button type="button" class="btn ghost" data-act="realTime">'+icon('clock')+'Back to real time</button>':'')+'</div>'
+ +'<div class="list"><button class="row" data-act="logout">'+icon('logout')+'<span class="main"><span class="t">Log out</span><span class="s">Sign in as another demo user to see their view</span></span></button><button class="row danger" data-act="reset">'+icon('refresh')+'<span class="main"><span class="t">Reset demo data</span></span></button></div>'
+ +'<p class="note">'+icon('info')+'<span>This prototype keeps its data in this browser only. Push messages appear as banners inside the app; in the live app they are delivered to phones.</span></p>')};
+function jump(date,time){S.settings.clockOffset=dParse(date,time).getTime()-Date.now();save();toast('App time set to '+fmtDT(now().getTime()));tick();render()}
+
+/* ---------- Admin ---------- */
+const adminRow=(view,ic,title,sub)=>'<button class="row" data-act="go" data-v="'+view+'"><span class="row-ic">'+icon(ic)+'</span><span class="main"><span class="t">'+title+'</span><span class="s">'+sub+'</span></span>'+chev+'</button>';
+VIEWS.adminRoot=()=>{const act=S.users.filter(u=>u.status==='active').length,inv=S.users.filter(u=>u.status==='invited').length,sch=S.notifs.filter(n=>n.status==='scheduled').length,sent=S.notifs.length-sch;
+ return page('Admin','<div class="stats"><div class="stat"><b>'+act+'</b><span>Signed in</span></div><div class="stat"><b>'+inv+'</b><span>Invited</span></div><div class="stat"><b>'+sch+'</b><span>Scheduled</span></div></div>'
+ +'<button class="btn block" data-act="go" data-v="compose">'+icon('bell')+'New push message</button>'
+ +'<div class="list">'+adminRow('notifList','announcements','Push messages',sch+' scheduled · '+sent+' sent')+adminRow('people','users','People',S.users.length+' people · add delegates by email')+adminRow('groups','group','Groups',S.groups.length+' groups for targeted information')+adminRow('contentList','doc','Content','Programme, speakers, sponsors and more')+adminRow('homeSettings','layout','Home screen','Buttons, background photo and logo')+'</div>'
+ +'<p class="note">'+icon('info')+'<span>Prototype: invitation emails and phone push are simulated. Content can also be edited directly in each section with the + and pencil buttons.</span></p>')};
+VIEWS.contentList=()=>page('Content','<p class="lead">Choose a section to add or edit its content.</p><div class="list">'+S.tiles.map(t=>{const n=t.id==='delegates'?S.users.length:t.id==='announcements'?S.notifs.length:items(t.id).length;const unit=t.id==='delegates'?'people':t.id==='announcements'?'messages':(n===1?'item':'items');return '<button class="row" data-act="open" data-s="'+t.id+'"><span class="row-ic">'+icon(t.id)+'</span><span class="main"><span class="t">'+esc(t.label)+'</span><span class="s">'+n+' '+unit+(t.hidden?' · hidden on home screen':'')+'</span></span>'+chev+'</button>'}).join('')+'</div>');
+VIEWS.notifList=v=>{const tab=v.tab||'scheduled';const sch=S.notifs.filter(n=>n.status==='scheduled').sort((a,b)=>a.sendAt-b.sendAt),sent=S.notifs.filter(n=>n.status==='sent').sort((a,b)=>b.sentAt-a.sentAt);const L=tab==='scheduled'?sch:sent;
+ const rows=L.map(n=>{const a=recips(n).filter(u=>u.status==='active').length;return '<div class="nrow"><span class="when">'+(tab==='scheduled'?'Scheduled for ':'Sent ')+fmtDT(tab==='scheduled'?n.sendAt:n.sentAt)+'</span><span class="t">'+esc(n.title)+'</span><span class="s">'+esc(n.body)+'</span><span class="gchips">'+targetChips(n)+'<span class="gchip">'+a+' '+(a===1?'recipient':'recipients')+'</span></span>'+(tab==='scheduled'?'<span class="btns"><button class="btn secondary sm" data-act="go" data-v="compose" data-id="'+n.id+'">Edit</button><button class="btn secondary sm" data-act="sendNow" data-id="'+n.id+'">Send now</button><button class="btn ghost sm danger-t" data-act="delNotif" data-id="'+n.id+'">Delete</button></span>':'')+'</div>'}).join('');
+ return page('Push messages','<div class="seg"><button data-act="notifTab" data-t="scheduled" aria-pressed="'+(tab==='scheduled')+'">Scheduled ('+sch.length+')</button><button data-act="notifTab" data-t="sent" aria-pressed="'+(tab==='sent')+'">Sent ('+sent.length+')</button></div>'+(L.length?'<div class="list">'+rows+'</div>':empty(tab==='scheduled'?'No scheduled messages.':'No messages sent yet.','announcements')),{right:'<button class="iconbtn" data-act="go" data-v="compose" aria-label="New push message">'+icon('plus')+'</button>'})};
+function reachText(all,gs){const L=S.users.filter(u=>all||(u.groups||[]).some(g=>gs.includes(g)));const a=L.filter(u=>u.status==='active').length,i=L.length-a;if(!L.length)return 'No one is in the selected groups yet.';return 'Reaches '+a+' signed-in '+(a===1?'person':'people')+(i?'. '+i+' invited '+(i===1?'person':'people')+' will find it in Announcements after signing in':'')+'.'}
+VIEWS.compose=v=>{const ex=v.id?S.notifs.find(n=>n.id===v.id):null;
+ const d=v.draft||(v.draft=ex?{title:ex.title,body:ex.body,all:ex.target.all,groups:ex.target.groups.slice(),when:'later',date:ymd(new Date(ex.sendAt)),time:hm(new Date(ex.sendAt))}:{title:'',body:'',all:true,groups:[],when:'now',date:ymd(now()),time:hm(new Date(now().getTime()+36e5))});
+ return page(ex?'Edit push message':'New push message','<form class="form" data-form="compose" novalidate>'
+ +'<div class="preview" aria-hidden="true"><div class="nb">'+APPICON+'<span class="main"><span class="nb-h"><span>Shippax Ferry Conference</span><span>now</span></span><b class="pv-t">'+(esc(d.title)||'Message title')+'</b><span class="nb-b pv-b">'+(esc(d.body)||'Your message appears here.')+'</span></span></div></div>'
+ +'<div class="field"><label for="c_t">Title</label><input id="c_t" name="title" maxlength="65" data-counter value="'+esc(d.title)+'"><span class="count">'+d.title.length+'/65</span></div>'
+ +'<div class="field"><label for="c_b">Message</label><textarea id="c_b" name="body" rows="4" maxlength="240" data-counter>'+esc(d.body)+'</textarea><span class="count">'+d.body.length+'/240</span></div>'
+ +'<div class="field"><span class="lbl">Send to</span><div class="seg" data-seg="target"><button type="button" data-act="seg" data-v="all" aria-pressed="'+d.all+'">Everyone</button><button type="button" data-act="seg" data-v="groups" aria-pressed="'+(!d.all)+'">Selected groups</button></div><div class="chips" data-chipset="tgroups" id="tgroups"'+(d.all?' hidden':'')+'>'+S.groups.map(g=>chip(g.id,g.name,d.groups.includes(g.id),g.color)).join('')+'</div><p class="hint" id="reach">'+reachText(d.all,d.groups)+'</p></div>'
+ +'<div class="field"><span class="lbl">When</span><div class="seg" data-seg="when"><button type="button" data-act="seg" data-v="now" aria-pressed="'+(d.when==='now')+'">Send now</button><button type="button" data-act="seg" data-v="later" aria-pressed="'+(d.when==='later')+'">Schedule</button></div><div class="two" id="sched"'+(d.when==='now'?' hidden':'')+'><input type="date" name="date" aria-label="Date" value="'+d.date+'"><input type="time" name="time" aria-label="Time" value="'+d.time+'"></div></div>'
+ +'<div class="actions">'+(ex?'<button type="button" class="btn danger" data-act="delNotif" data-id="'+ex.id+'">Delete</button>':'')+'<button class="btn" type="submit" id="csubmit">'+(d.when==='now'?'Send now':'Schedule message')+'</button></div></form>')};
+function updReach(form){const all=segVal(form,'target')==='all';$('#reach',form).textContent=reachText(all,all?[]:chipVals(form,'tgroups'))}
+const SEGHOOK={
+ target:(val,form)=>{$('#tgroups',form).hidden=val==='all';updReach(form)},
+ when:(val,form)=>{$('#sched',form).hidden=val==='now';$('#csubmit',form).textContent=val==='now'?'Send now':'Schedule message'}
+};
+function peopleRows(v){const f=v.f||'all';let L=S.users.slice().sort(byName);if(f==='active')L=L.filter(u=>u.status==='active');if(f==='invited')L=L.filter(u=>u.status==='invited');if(f==='admins')L=L.filter(u=>u.role==='admin');L=L.filter(u=>matchQ(v.q,uname(u),u.email,u.company));
+ if(!L.length)return '<p class="hint pad">No one here yet.</p>';
+ return L.map(u=>'<button class="row" data-act="go" data-v="personEdit" data-uid="'+u.id+'">'+avatar(u,44)+'<span class="main"><span class="t">'+esc(u.status==='active'?uname(u):u.email)+'</span><span class="s one">'+esc(u.status==='active'?[u.title,u.company].filter(Boolean).join(', '):'Invited '+fmtDate(u.invitedAt)+', not signed in yet')+'</span><span class="gchips">'+(u.role==='admin'?'<span class="pill red sm">Admin</span>':'')+(u.status==='invited'?'<span class="pill amber sm">Invited</span>':'')+groupChips(u.groups)+'</span></span>'+chev+'</button>').join('')}
+VIEWS.people=v=>{const f=v.f||'all';const cnt={all:S.users.length,active:S.users.filter(u=>u.status==='active').length,invited:S.users.filter(u=>u.status==='invited').length,admins:S.users.filter(u=>u.role==='admin').length};
+ return page('People','<input type="search" class="search" placeholder="Search name, email or company" aria-label="Search people" data-filter="people" value="'+esc(v.q||'')+'"><div class="chips scroll">'+[['all','All'],['active','Signed in'],['invited','Invited'],['admins','Admins']].map(([k,l])=>'<button class="chip" data-act="peopleFilter" data-f="'+k+'" aria-pressed="'+(f===k)+'">'+l+' <span class="n">'+cnt[k]+'</span></button>').join('')+'</div><div class="list" id="plist">'+peopleRows(v)+'</div>',{right:'<button class="iconbtn" data-act="go" data-v="addPeople" aria-label="Add people">'+icon('plus')+'</button>'})};
+const parseEmails=t=>[...new Set((String(t).match(/[A-Z0-9._%+'-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi)||[]).map(e=>e.toLowerCase()))];
+VIEWS.addPeople=()=>{const del=S.groups.find(g=>g.name==='Delegates');
+ return page('Add people','<form class="form" data-form="addPeople" novalidate><p class="lead">Each person gets an invitation email with a sign-in link. They then add their own photo, job title, company and short bio.</p>'
+ +'<div class="field"><label for="ap_e">Email addresses</label><textarea id="ap_e" name="emails" rows="6" data-parse placeholder="One per line, or paste a list from Excel or Outlook"></textarea><p class="hint" id="apcount">No addresses yet.</p></div>'
+ +'<div class="field"><span class="lbl">Role</span><div class="seg" data-seg="role"><button type="button" data-act="seg" data-v="delegate" aria-pressed="true">Delegate</button><button type="button" data-act="seg" data-v="admin" aria-pressed="false">Admin</button></div></div>'
+ +'<div class="field"><span class="lbl">Add to groups <span class="opt">optional</span></span><div class="chips" data-chipset="groups">'+S.groups.map(g=>chip(g.id,g.name,del&&g.id===del.id,g.color)).join('')+'</div></div>'
+ +'<button class="btn block" type="submit">'+icon('mail')+'Add and invite</button></form>')};
+VIEWS.personEdit=v=>{const u=user(v.uid);if(!u)return page('Person',empty('This person has been removed.'));const self=u.id===S.me;
+ return page(u.status==='active'?uname(u):'Invited person','<div class="person compact">'+avatar(u,68)+'<div><h2>'+esc(uname(u))+'</h2><span class="s">'+esc(u.email)+'</span><div style="margin-top:6px">'+(u.status==='active'?'<span class="pill green">Signed in</span>':'<span class="pill amber">Invited '+fmtDate(u.invitedAt)+'</span>')+'</div></div></div>'
+ +'<form class="form" data-form="personEdit"><div class="field"><span class="lbl">Role</span><div class="seg" data-seg="role"><button type="button" data-act="seg" data-v="delegate" aria-pressed="'+(u.role!=='admin')+'">Delegate</button><button type="button" data-act="seg" data-v="admin" aria-pressed="'+(u.role==='admin')+'">Admin</button></div><p class="hint">Admins can edit content, manage people and groups, and send push messages.</p></div>'
+ +'<div class="field"><span class="lbl">Groups</span><div class="chips" data-chipset="groups">'+S.groups.map(g=>chip(g.id,g.name,(u.groups||[]).includes(g.id),g.color)).join('')+'</div></div><button class="btn block" type="submit">Save changes</button></form>'
+ +'<div class="list">'+(u.status==='invited'?'<button class="row" data-act="resend" data-uid="'+u.id+'">'+icon('mail')+'<span class="main"><span class="t">Send the invitation again</span></span></button>':'<button class="row" data-act="profile" data-uid="'+u.id+'">'+icon('users')+'<span class="main"><span class="t">View profile</span></span>'+chev+'</button>')+(!self?'<button class="row danger" data-act="removeUser" data-uid="'+u.id+'">'+icon('trash')+'<span class="main"><span class="t">Remove from the conference</span></span></button>':'')+'</div>'
+ +'<p class="note">'+icon('info')+'<span>Name, photo, job title, company and bio are filled in by the person themselves.</span></p>')};
+VIEWS.groups=()=>page('Groups','<p class="lead">Use groups to send push messages to selected people, and to show sessions or information to some people only.</p><div class="list">'+S.groups.map(g=>{const n=S.users.filter(u=>(u.groups||[]).includes(g.id)).length;return '<button class="row" data-act="go" data-v="groupEdit" data-id="'+g.id+'"><span class="row-ic" style="background:'+g.color+'">'+icon('group')+'</span><span class="main"><span class="t">'+esc(g.name)+'</span><span class="s">'+n+' '+(n===1?'member':'members')+'</span></span>'+chev+'</button>'}).join('')+'</div>',{right:'<button class="iconbtn" data-act="go" data-v="groupEdit" aria-label="New group">'+icon('plus')+'</button>'});
+VIEWS.groupEdit=v=>{const g=v.id?group(v.id):null;if(!v.color)v.color=g?g.color:COLORS[S.groups.length%COLORS.length];
+ return page(g?'Edit group':'New group','<form class="form" data-form="groupEdit" novalidate><div class="field"><label for="g_n">Group name</label><input id="g_n" name="name" value="'+esc(g?g.name:'')+'" placeholder="For example: Gala dinner hosts"></div>'
+ +'<div class="field"><span class="lbl">Colour</span><div class="swatches">'+COLORS.map(c=>'<button type="button" class="sw" data-act="swatch" data-c="'+c+'" style="background:'+c+'" aria-pressed="'+(c===v.color)+'" aria-label="Colour '+c+'"></button>').join('')+'</div></div>'
+ +'<div class="field"><span class="lbl">Members</span><input type="search" class="search" placeholder="Search people" aria-label="Search people" data-filter="members"><div class="list" id="mlist">'+S.users.slice().sort(byName).map(u=>'<label class="row check" data-name="'+esc((uname(u)+' '+u.email+' '+(u.company||'')).toLowerCase())+'">'+avatar(u,36)+'<span class="main"><span class="t">'+esc(uname(u))+'</span><span class="s">'+esc(u.status==='invited'?'Invited':u.company||'')+'</span></span><input type="checkbox" name="m" value="'+u.id+'"'+(g&&(u.groups||[]).includes(g.id)?' checked':'')+' aria-label="Member: '+esc(uname(u))+'"></label>').join('')+'</div></div>'
+ +'<div class="actions">'+(g?'<button type="button" class="btn danger" data-act="delGroup" data-id="'+g.id+'">Delete group</button>':'')+'<button class="btn" type="submit">Save group</button></div></form>')};
+VIEWS.homeSettings=v=>{const d=v.draft||(v.draft={tiles:S.tiles.map(t=>Object.assign({},t)),bg:S.settings.bg,logo:S.settings.logo,tagline:S.settings.tagline});
+ return page('Home screen','<form class="form" data-form="homeSettings"><div class="field"><span class="lbl">Buttons</span><div class="list">'+d.tiles.map((t,i)=>'<div class="tile-row"><span class="mini-tile">'+icon(t.id)+'</span><input name="label_'+t.id+'" value="'+esc(t.label)+'" aria-label="Button label"><label class="mini-check"><input type="checkbox" name="show_'+t.id+'"'+(t.hidden?'':' checked')+'>Show</label><span class="updown"><button type="button" class="iconbtn sm" data-act="tileMove" data-i="'+i+'" data-dir="-1"'+(i===0?' disabled':'')+' aria-label="Move up">'+icon('up')+'</button><button type="button" class="iconbtn sm" data-act="tileMove" data-i="'+i+'" data-dir="1"'+(i===d.tiles.length-1?' disabled':'')+' aria-label="Move down">'+icon('down')+'</button></span></div>').join('')+'</div></div>'
+ +'<div class="field"><label for="hs_t">Event line</label><input id="hs_t" name="tagline" value="'+esc(d.tagline||'')+'"><p class="hint">Shown at the top of the programme before the conference starts.</p></div>'
+ +imageField({k:'bg',l:'Background photo',shape:'bg'},d.bg)
+ +imageField({k:'logo',l:'Logo',shape:'logo'},d.logo)
+ +'<p class="hint">Use a white logo on a transparent background (PNG). Without one, the Shippax Ferry Conference wordmark is shown.</p>'
+ +'<button class="btn block" type="submit">Save home screen</button></form>')};
+function syncTiles(form,d){d.tiles.forEach(t=>{const a=form.elements['label_'+t.id];if(a)t.label=a.value.trim()||t.label;const b=form.elements['show_'+t.id];if(b)t.hidden=!b.checked});d.tagline=form.elements.tagline.value}
+
+/* ---------- Sign in ---------- */
+function renderAuth(){const a=auth;let card='';
+ if(a.step==='email'){const demo=['victor@shippax.se','anna.lindqvist@example.com','mikko.virtanen@example.com','new.delegate@example.com'].map(e=>S.users.find(u=>u.email===e)).filter(Boolean);
+  const extra=S.users.filter(u=>u.role==='admin'&&!demo.includes(u));
+  card='<form class="auth-card" data-form="authEmail" novalidate><h2>Sign in</h2><p>Use the email address your invitation was sent to.</p><div class="field"><label for="a_e">Email</label><input id="a_e" type="email" name="email" autocomplete="email" placeholder="name@company.com" value="'+esc(a.email||'')+'"></div>'+(a.err?'<p class="err">'+esc(a.err)+'</p>':'')+'<button class="btn block" type="submit">Continue</button></form>'
+  +'<div class="auth-card"><span class="lbl">Prototype: tap to sign in as</span><div class="demo-list">'+demo.concat(extra).map(u=>'<button type="button" class="demo-u" data-act="demoLogin" data-uid="'+u.id+'">'+avatar(u,34)+'<span><b>'+esc(u.status==='active'?uname(u):u.email)+'</b><small>'+(u.role==='admin'?'Admin':u.status==='invited'?'Invited, has not signed in yet':'Delegate')+'</small></span></button>').join('')+'</div><p class="hint">Names, companies and times in this prototype are sample content.</p></div>'}
+ if(a.step==='code')card='<form class="auth-card" data-form="authCode" novalidate><h2>Check your email</h2><p>We have sent a six-digit code to <b>'+esc(a.email)+'</b>.</p><div class="field"><label for="a_c">Code</label><input id="a_c" name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="123456"></div><p class="hint">Prototype: any six digits work.</p>'+(a.err?'<p class="err">'+esc(a.err)+'</p>':'')+'<button class="btn block" type="submit">Sign in</button><button type="button" class="btn ghost block" data-act="authBack">Use a different email</button></form>';
+ if(a.step==='profile'){if(!a.draft)a.draft={visible:true,push:true};card='<div class="auth-card"><h2>Welcome aboard</h2><p>Complete your profile so other delegates know who you are.</p>'+profileForm(a.draft,'Join the conference','onboard',a.email)+'</div>'}
+ return homeWrap(logoHTML()+card,'auth')}
+function loginAs(u,msg){S.me=u.id;resetNav();shown=null;auth={step:'email'};save();render();toast(msg||('Signed in as '+uname(u)));setTimeout(tick,600)}
+
+/* ---------- Image handling ---------- */
+function shrink(file,max,type){return new Promise((res,rej)=>{const fr=new FileReader();fr.onload=()=>{const img=new Image();img.onload=()=>{const r=Math.min(1,max/Math.max(img.width||max,img.height||max));const c=document.createElement('canvas');c.width=Math.max(1,Math.round((img.width||max)*r));c.height=Math.max(1,Math.round((img.height||max)*r));const x=c.getContext('2d');if(type==='image/jpeg'){x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height)}x.drawImage(img,0,0,c.width,c.height);res(c.toDataURL(type,.82))};img.onerror=()=>rej(new Error('image'));img.src=fr.result};fr.onerror=()=>rej(new Error('read'));fr.readAsDataURL(file)})}
+function paintImg(k,url){const box=document.querySelector('.imgpick[data-k="'+k+'"]');if(!box)return;const p=box.querySelector('.imgprev');p.style.backgroundImage=url?'url('+url+')':'';p.innerHTML=url?'':icon('camera');box.querySelector('.up-lbl').textContent=url?'Replace':'Upload';box.querySelector('[data-act="imgClear"]').hidden=!url}
+async function onImage(input){const file=input.files&&input.files[0];if(!file)return;const k=input.dataset.img,shape=input.dataset.shape;const max={round:420,logo:520,wide:1100,bg:1500}[shape]||600;
+ try{const url=await shrink(file,max,shape==='logo'?'image/png':'image/jpeg');getDraft()[k]=url;paintImg(k,url)}catch(e){toast('That file could not be opened as an image.')}input.value=''}
+
+/* ---------- Actions ---------- */
+const A={
+ back:()=>back(),
+ fs:()=>toggleFs(),
+ tab:el=>setTab(el.dataset.t),
+ open:el=>go({v:'section',s:el.dataset.s}),
+ item:el=>go({v:'item',s:el.dataset.s,id:el.dataset.id}),
+ add:el=>{const s=el.dataset.s;if(s==='announcements')go({v:'compose'});else if(s==='delegates')go({v:'addPeople'});else go({v:'edit',s,id:null})},
+ editItem:el=>go({v:'edit',s:el.dataset.s,id:el.dataset.id}),
+ delItem:async()=>{const v=cur();if(!await ask('Delete this '+SCHEMA[v.s].noun+'? This cannot be undone.','Delete'))return;S.items[v.s]=items(v.s).filter(x=>x.id!==v.id);if(v.s==='speakers')items('programme').forEach(s=>s.speakers=(s.speakers||[]).filter(id=>id!==v.id));save();const st=stack();st.pop();const top=st[st.length-1];if(top&&top.v==='item'&&top.id===v.id)st.pop();render();toast('Deleted')},
+ go:el=>go({v:el.dataset.v,id:el.dataset.id||null,uid:el.dataset.uid||null}),
+ day:el=>{cur().day=el.dataset.d;cur().scroll=0;render()},
+ profile:el=>go({v:'profile',uid:el.dataset.uid}),
+ msgUser:el=>openChat(el.dataset.uid),
+ chat:el=>go({v:'chat',cid:el.dataset.cid}),
+ chip:el=>{el.setAttribute('aria-pressed',el.getAttribute('aria-pressed')==='true'?'false':'true');const f=el.closest('form');if(f&&f.dataset.form==='compose')updReach(f)},
+ seg:el=>{const box=el.closest('.seg');box.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b===el?'true':'false'));const h=SEGHOOK[box.dataset.seg];if(h)h(el.dataset.v,el.closest('form'))},
+ imgClear:el=>{getDraft()[el.dataset.k]=null;paintImg(el.dataset.k,null)},
+ swatch:el=>{el.parentElement.querySelectorAll('.sw').forEach(b=>b.setAttribute('aria-pressed',b===el?'true':'false'));cur().color=el.dataset.c},
+ tileMove:el=>{const v=cur();const f=el.closest('form');syncTiles(f,v.draft);const i=+el.dataset.i,j=i+(+el.dataset.dir);const T=v.draft.tiles;if(j<0||j>=T.length)return;[T[i],T[j]]=[T[j],T[i]];render()},
+ notifTab:el=>{cur().tab=el.dataset.t;render()},
+ peopleFilter:el=>{cur().f=el.dataset.f;render()},
+ jump:el=>jump(el.dataset.d,el.dataset.t),
+ jumpCustom:()=>{const val=($('#dtl')||{}).value;if(!val)return toast('Choose a date and time first.');const [d,t]=val.split('T');jump(d,t)},
+ realTime:()=>{S.settings.clockOffset=0;save();render();toast('Using real time')},
+ logout:()=>{S.me=null;resetNav();shown=null;auth={step:'email'};save();render()},
+ reset:async()=>{if(!await ask('Reset all demo data? Everything added or changed in this browser is removed.','Reset'))return;S=seed();save();resetNav();shown=null;render();toast('Demo data restored')},
+ demoLogin:el=>{const u=user(el.dataset.uid);if(!u)return;if(u.status==='invited'){auth={step:'profile',email:u.email,uid:u.id,draft:{visible:true,push:true}};render()}else loginAs(u)},
+ authBack:()=>{auth={step:'email'};render()},
+ banner:()=>{$('#banner').classList.remove('show');if(!me())return;nav.tab='home';nav.stacks.home=[{v:'section',s:'announcements'}];render()},
+ sendNow:el=>{const n=S.notifs.find(x=>x.id===el.dataset.id);if(!n)return;n.status='sent';n.sentAt=now().getTime();n.sendAt=n.sentAt;save();render();const a=recips(n).filter(u=>u.status==='active').length;toast('Sent to '+a+' '+(a===1?'person':'people'));const u=me();if(isRecipient(n,u)&&u.push!==false)setTimeout(()=>showBanner(n,1),400)},
+ delNotif:async el=>{if(!await ask('Delete this push message?','Delete'))return;S.notifs=S.notifs.filter(x=>x.id!==el.dataset.id);save();if(cur().v==='compose')stack().pop();render();toast('Deleted')},
+ resend:el=>{const u=user(el.dataset.uid);u.invitedAt=now().getTime();save();render();toast('Invitation queued again for '+u.email)},
+ removeUser:async el=>{const u=user(el.dataset.uid);if(!u)return;if(!await ask('Remove '+uname(u)+' from the conference? They will no longer be able to sign in.','Remove'))return;S.users=S.users.filter(x=>x.id!==u.id);S.convs=S.convs.filter(c=>!c.members.includes(u.id));save();const st=stack();st.pop();const top=st[st.length-1];if(top&&top.uid===u.id)st.pop();render();toast('Removed')},
+ delGroup:async el=>{const g=group(el.dataset.id);if(!g)return;if(!await ask('Delete the group '+g.name+'? People stay on the list; only the group is removed.','Delete group'))return;S.groups=S.groups.filter(x=>x.id!==g.id);S.users.forEach(u=>u.groups=(u.groups||[]).filter(x=>x!==g.id));Object.values(S.items).forEach(L=>L.forEach(it=>{if(it.groups)it.groups=it.groups.filter(x=>x!==g.id)}));S.notifs.forEach(n=>n.target.groups=n.target.groups.filter(x=>x!==g.id));save();stack().pop();render();toast('Group deleted')}
+};
+
+/* ---------- Forms ---------- */
+const FORMS={
+ item:form=>{const v=cur();const sc=SCHEMA[v.s];const d=v.draft;const f=new FormData(form);
+  sc.fields.forEach(fd=>{if(['text','url','date','time','textarea','select'].includes(fd.t))d[fd.k]=String(f.get(fd.k)||'').trim();if(fd.t==='speakers'||fd.t==='groups')d[fd.k]=chipVals(form,fd.k)});
+  for(const fd of sc.fields)if(fd.req&&!d[fd.k])return toast('Please fill in: '+fd.l.toLowerCase()+'.');
+  if(v.s==='programme'&&d.end<=d.start)return toast('The session must end after it starts.');
+  if(d.website&&!/^https?:\/\//i.test(d.website))d.website='https://'+d.website;
+  const arr=items(v.s);if(v.id){const i=arr.findIndex(x=>x.id===v.id);if(i>-1)arr[i]=Object.assign(arr[i],d)}else{d.id=nid();arr.push(d)}
+  save();stack().pop();render();toast('Saved')},
+ compose:form=>{const v=cur();const ex=v.id?S.notifs.find(n=>n.id===v.id&&n.status==='scheduled'):null;
+  const title=form.elements.title.value.trim(),body=form.elements.body.value.trim();if(!title||!body)return toast('Add a title and a message.');
+  const all=segVal(form,'target')==='all';const groups=all?[]:chipVals(form,'tgroups');if(!all&&!groups.length)return toast('Choose at least one group, or send to everyone.');
+  const when=segVal(form,'when');let at=now().getTime();
+  if(when==='later'){const dd=form.elements.date.value,tt=form.elements.time.value;if(!dd||!tt)return toast('Choose a date and time.');at=dParse(dd,tt).getTime();if(at<=now().getTime())return toast('Pick a time in the future, or choose Send now.')}
+  const n=ex||{id:nid(),createdBy:S.me};Object.assign(n,{title,body,target:{all,groups},sendAt:at,status:when==='now'?'sent':'scheduled',sentAt:when==='now'?at:null});if(!ex)S.notifs.push(n);
+  save();stack().pop();render();
+  if(when==='now'){const a=recips(n).filter(u=>u.status==='active').length;toast('Sent to '+a+' '+(a===1?'person':'people'));const u=me();if(isRecipient(n,u)&&u.push!==false)setTimeout(()=>showBanner(n,1),500)}else toast('Scheduled for '+fmtDT(at))},
+ msg:form=>{const ta=form.elements.text;const t=ta.value.trim();if(!t)return;const c=S.convs.find(x=>x.id===cur().cid);if(!c)return;const l=lastMsg(c);const at=Math.max(now().getTime(),l?l.at+1:0);
+  c.msgs.push({id:nid(),from:S.me,text:t,at});c.read[S.me]=at;save();ta.value='';autosize(ta);const o=user(c.members.find(x=>x!==S.me));const m=$('#msgs');m.innerHTML=msgsHTML(c,o);m.scrollTop=m.scrollHeight;ta.focus();renderNav()},
+ addPeople:form=>{const found=parseEmails(form.elements.emails.value);if(!found.length)return toast('Add at least one email address.');const role=segVal(form,'role')||'delegate';const gs=chipVals(form,'groups');let added=0,skipped=0;
+  found.forEach(e=>{if(S.users.some(u=>u.email===e)){skipped++;return}S.users.push({id:nid(),email:e,role,status:'invited',firstName:'',lastName:'',title:'',company:'',bio:'',linkedin:'',photo:null,groups:gs,visible:true,push:true,invitedAt:now().getTime()});added++});
+  save();stack().pop();render();toast(added+' '+(added===1?'person':'people')+' invited'+(skipped?'. '+skipped+' already on the list':''))},
+ personEdit:form=>{const u=user(cur().uid);if(!u)return;const role=segVal(form,'role');
+  if(u.role==='admin'&&role!=='admin'&&S.users.filter(x=>x.role==='admin').length<2)return toast('The conference needs at least one admin.');
+  u.role=role;u.groups=chipVals(form,'groups');save();stack().pop();render();toast('Saved')},
+ groupEdit:form=>{const v=cur();const name=form.elements.name.value.trim();if(!name)return toast('Give the group a name.');let g=v.id?group(v.id):null;if(!g){g={id:nid(),name,color:v.color};S.groups.push(g)}g.name=name;g.color=v.color;
+  const ids=new Set([...form.querySelectorAll('input[name="m"]:checked')].map(x=>x.value));S.users.forEach(u=>{const has=(u.groups||[]).includes(g.id);if(ids.has(u.id)&&!has)u.groups=(u.groups||[]).concat(g.id);if(!ids.has(u.id)&&has)u.groups=u.groups.filter(x=>x!==g.id)});
+  save();stack().pop();render();toast('Group saved')},
+ homeSettings:form=>{const d=cur().draft;syncTiles(form,d);S.tiles=d.tiles;S.settings.bg=d.bg||null;S.settings.logo=d.logo||null;S.settings.tagline=d.tagline.trim();save();stack().pop();render();toast('Home screen saved')},
+ editProfile:form=>{const d=cur().draft;if(!readProfile(form,d))return;const u=me();PROFILE_KEYS.forEach(k=>u[k]=d[k]);save();stack().pop();render();toast('Profile saved')},
+ authEmail:form=>{const e=form.elements.email.value.trim().toLowerCase();auth.email=e;const u=S.users.find(x=>x.email===e);
+  if(!u){auth.err="We can't find an invitation for this address. Check the spelling, or contact the organisers.";render();return}auth={step:'code',email:e,uid:u.id};render();const c=$('#a_c');if(c)c.focus()},
+ authCode:form=>{const code=form.elements.code.value.trim();if(!/^\d{6}$/.test(code)){auth.err='Enter the six digits from the email.';render();return}const u=user(auth.uid);if(!u){auth={step:'email'};render();return}
+  if(u.status==='invited'){auth={step:'profile',email:u.email,uid:u.id,draft:{visible:true,push:true}};render()}else loginAs(u)},
+ onboard:form=>{const d=auth.draft;if(!readProfile(form,d))return;const u=user(auth.uid);if(!u)return;PROFILE_KEYS.forEach(k=>u[k]=d[k]);u.status='active';u.joinedAt=now().getTime();loginAs(u,'Welcome aboard, '+u.firstName)}
+};
+
+/* ---------- Live filters ---------- */
+const FILTER={
+ delegates:el=>{cur().q=el.value;$('#dlist').innerHTML=delegateRows(el.value)},
+ global:el=>{cur().q=el.value;$('#results').innerHTML=searchResults(el.value)},
+ newchat:el=>{cur().q=el.value;$('#ulist').innerHTML=pickRows(el.value)},
+ people:el=>{cur().q=el.value;$('#plist').innerHTML=peopleRows(cur())},
+ members:el=>{const q=el.value.toLowerCase().trim();document.querySelectorAll('#mlist .row').forEach(r=>r.hidden=!!q&&!r.dataset.name.includes(q))}
+};
+
+/* ---------- Events ---------- */
+document.addEventListener('click',e=>{const el=e.target.closest('[data-act]');if(!el||el.disabled)return;const f=A[el.dataset.act];if(f){e.preventDefault();f(el,e)}});
+document.addEventListener('submit',e=>{const f=e.target.closest('form[data-form]');if(!f)return;e.preventDefault();const h=FORMS[f.dataset.form];if(h)h(f)});
+document.addEventListener('input',e=>{const el=e.target;
+ if(el.matches('[data-counter]')){const c=el.parentElement.querySelector('.count');if(c)c.textContent=el.value.length+'/'+el.maxLength}
+ if(el.matches('[data-filter]'))FILTER[el.dataset.filter](el);
+ const f=el.form;if(f&&f.dataset.form==='compose'&&(el.name==='title'||el.name==='body')){$('.pv-t',f).textContent=f.elements.title.value.trim()||'Message title';$('.pv-b',f).textContent=f.elements.body.value.trim()||'Your message appears here.'}
+ if(el.matches('[data-parse]')){const L=parseEmails(el.value);const ex=L.filter(x=>S.users.some(u=>u.email===x)).length;$('#apcount').textContent=L.length?(L.length+' email '+(L.length===1?'address':'addresses')+' found'+(ex?', '+ex+' already on the list':'')+'.'):'No addresses yet.'}
+ if(el.id==='msgInput')autosize(el)});
+document.addEventListener('change',e=>{const el=e.target;
+ if(el.matches('input[type=file][data-img]'))onImage(el);
+ if(el.matches('[data-toggle]')){const u=me();if(!u)return;u[el.dataset.toggle]=el.checked;save();toast(el.dataset.toggle==='push'?(el.checked?'Push notifications on':'Push notifications off'):(el.checked?'You are visible in the delegate list':'You are hidden from the delegate list'))}});
+document.addEventListener('keydown',e=>{if(e.target.id==='msgInput'&&e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();e.target.form.requestSubmit()}});
+
+render();
+setTimeout(tick,800);
+setInterval(tick,3000);
+setInterval(softRender,20000);
+})();
+</script>
+<script>
+if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})})}
+</script>
+</body>
+</html>
